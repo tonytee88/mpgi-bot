@@ -11,6 +11,7 @@ clientdiscord.on('message', msg => {
     // Check if the message starts with "hello"
     if (msg.content.toLowerCase() === 'hello') {
         // Reply with "hello"
+        msg.reply("hello")
         helloplusone()
         msg.reply(`hello: ${progressIndicator}`);
     }

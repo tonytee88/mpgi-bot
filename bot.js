@@ -1,5 +1,8 @@
 const Discord = require('discord.js');
-const clientdiscord = new Discord.Client();
+
+const discordClient = new Client({
+    intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]
+});
 const token = process.env.DISCORD_BOT_TOKEN;
 
 const { Client } = require('pg');

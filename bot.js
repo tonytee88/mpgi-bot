@@ -24,6 +24,8 @@ clientdiscord.on('message', async (msg) => { // Notice async here
     }
 });
 
+console.log("hello")
+
 async function incrementCategoryX() {
     await client.query(`
         UPDATE categories

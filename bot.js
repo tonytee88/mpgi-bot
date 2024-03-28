@@ -1,24 +1,7 @@
-//discord stuff
 const Discord = require('discord.js');
 const clientdiscord = new Discord.Client();
 const token = process.env.DISCORD_BOT_TOKEN;
 
-clientdiscord.on('ready', () => {
-    console.log(`Logged in as ${clientdiscord.user.tag}!`);
-});
-
-clientdiscord.on('message', msg => {
-    // Check if the message starts with "hello"
-    if (msg.content.toLowerCase() === 'hello') {
-        // Reply with "hello"
-        msg.reply("hello")
-        helloplusone()
-        msg.reply(`hello: ${progressIndicator}`);
-    }
-});
-
-
-//pg stuff
 const { Client } = require('pg');
 const client = new Client({
     connectionString: process.env.POSTGRES_CONNECTION_STRING
@@ -26,7 +9,21 @@ const client = new Client({
 
 client.connect();
 
-// Function to increment points for Category X
+clientdiscord.on('ready', () => {
+    console.log(`Logged in as ${clientdiscord.user.tag}!`);
+});
+
+clientdiscord.on('message', async (msg) => { // Notice async here
+    if (msg.content.toLowerCase() === 'hello') {
+        try {
+            await helloplusone(msg); // Await the completion of helloplusone
+        } catch (error) {
+            console.error('Error updating progress:', error);
+            msg.reply('Sorry, there was an error processing your request.');
+        }
+    }
+});
+
 async function incrementCategoryX() {
     await client.query(`
         UPDATE categories
@@ -35,7 +32,6 @@ async function incrementCategoryX() {
     `);
 }
 
-// Function to get total points for Category X
 async function getTotalPointsForCategoryX() {
     const result = await client.query(`
         SELECT total_points
@@ -45,14 +41,15 @@ async function getTotalPointsForCategoryX() {
     return result.rows[0].total_points;
 }
 
-// Example usage
-async function helloplusone() {
+// Modified to accept the message object
+async function helloplusone(msg) {
     await incrementCategoryX();
     const totalPoints = await getTotalPointsForCategoryX();
     const progressIndicator = '|'.repeat(totalPoints);
     console.log(`Total points for Category X: ${totalPoints}`);
     console.log(`Progress: ${progressIndicator}`);
+    msg.reply("hello"); // Reply "hello" here
+    msg.reply(`hello: ${progressIndicator}`); // Show progress after incrementing
 }
-
 
 clientdiscord.login(token);

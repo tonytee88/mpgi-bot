@@ -1,7 +1,7 @@
 const { Client: clientDiscord, GatewayIntentBits } = require('discord.js');
 
 const clientdiscord = new clientDiscord({
-    intents: [GaatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, ]
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, ]
 });
 const token = process.env.DISCORD_BOT_TOKEN;
 

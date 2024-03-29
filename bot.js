@@ -77,6 +77,7 @@ clientdiscord.on('ready', () => {
 //test simply hello
 clientdiscord.on('message', message => {
     // Ignore messages from the bot itself or other bots to prevent loops or unnecessary processing.
+   console.log("message read in channel")
     if (msg.author.bot) return;
     msg.channel.send("hey nice job");
 

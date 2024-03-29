@@ -81,6 +81,7 @@ clientdiscord.on('message', async (msg) => {
 
     // Check if the message content is 'hello1' (case-insensitive).
     if (msg.content.toLowerCase() === 'hello1') {
+        console.log("user has said hello1")
         try {
             // Reply to the message with 'hello2'.
             await msg.reply('hello2');

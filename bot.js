@@ -26,6 +26,7 @@ const client = new Client({
 });
 
 client.connect();
+console.log("client connected")
 
 clientdiscord.on('ready', () => {
     console.log(`Logged in as ${clientdiscord.user.tag}!`);

@@ -22,8 +22,11 @@ const token = process.env.DISCORD_BOT_TOKEN;
 
 const { Client } = require('pg');
 const client = new Client({
-    connectionString: process.env.POSTGRES_CONNECTION_STRING
-});
+    connectionString: process.env.POSTGRES_CONNECTION_STRING,
+    ssl: {
+      rejectUnauthorized: false,  // allows connection to Heroku PostgreSQL without a valid certificate
+    },
+  });
 
 client.connect();
 console.log("client connected")

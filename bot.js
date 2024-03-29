@@ -1,3 +1,4 @@
+console.log("hello world heroku");
 const { Client: clientDiscord, GatewayIntentBits } = require('discord.js');
 
 const clientdiscord = new clientDiscord({

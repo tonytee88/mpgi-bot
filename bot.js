@@ -1,4 +1,18 @@
 console.log("hello world heroku");
+const express = require('express');
+const app = express();
+
+// Respond with "Bot is running" on the root URL ("/")
+app.get('/', (req, res) => {
+  res.send('Bot is running');
+});
+
+// Listen on the appropriate port for Heroku
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
 const { Client: clientDiscord, GatewayIntentBits } = require('discord.js');
 
 const clientdiscord = new clientDiscord({
@@ -17,18 +31,16 @@ clientdiscord.on('ready', () => {
     console.log(`Logged in as ${clientdiscord.user.tag}!`);
 });
 
-clientdiscord.on('message', async (msg) => { // Notice async here
+clientdiscord.on('message', async (msg) => {
     if (msg.content.toLowerCase() === 'hello') {
         try {
-            await helloplusone(msg); // Await the completion of helloplusone
+            await helloplusone(msg);
         } catch (error) {
             console.error('Error updating progress:', error);
             msg.reply('Sorry, there was an error processing your request.');
         }
     }
 });
-
-console.log("hello")
 
 async function incrementCategoryX() {
     await client.query(`

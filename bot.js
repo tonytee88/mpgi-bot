@@ -74,4 +74,31 @@ async function helloplusone(msg) {
     msg.reply(`hello: ${progressIndicator}`); // Show progress after incrementing
 }
 
+//test simply hello
+clientdiscord.on('message', async (msg) => {
+    // Ignore messages from the bot itself or other bots to prevent loops or unnecessary processing.
+    if (msg.author.bot) return;
+
+    // Check if the message content is 'hello1' (case-insensitive).
+    if (msg.content.toLowerCase() === 'hello1') {
+        try {
+            // Reply to the message with 'hello2'.
+            await msg.reply('hello2');
+        } catch (error) {
+            console.error('Error sending reply:', error);
+        }
+    }
+
+    // Your existing code for handling 'hello'.
+    if (msg.content.toLowerCase() === 'hello') {
+        try {
+            await helloplusone(msg); // Assuming this is a function you've defined elsewhere.
+        } catch (error) {
+            console.error('Error updating progress:', error);
+            msg.reply('Sorry, there was an error processing your request.');
+        }
+    }
+});
+
+
 clientdiscord.login(token);

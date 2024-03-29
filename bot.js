@@ -78,7 +78,7 @@ clientdiscord.on('ready', () => {
 clientdiscord.on('message', async (msg) => {
     // Ignore messages from the bot itself or other bots to prevent loops or unnecessary processing.
     if (msg.author.bot) return;
-
+    message.channel.send("hey nice job");
     // Check if the message content is 'hello1' (case-insensitive).
     if (msg.content.toLowerCase() === 'hello1') {
         console.log("user has said hello1")

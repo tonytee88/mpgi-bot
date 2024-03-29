@@ -73,6 +73,7 @@ clientdiscord.on('ready', () => {
 //     msg.reply("hello"); // Reply "hello" here
 //     msg.reply(`hello: ${progressIndicator}`); // Show progress after incrementing
 // }
+clientdiscord.login(token);
 
 //test simply hello
 clientdiscord.on('message', message => {
@@ -132,4 +133,4 @@ clientdiscord.on('message', async (message) => {
 
 //end of pg.test
 
-clientdiscord.login(token);
+

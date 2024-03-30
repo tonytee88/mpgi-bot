@@ -1,14 +1,14 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { pgClient } = require('../../bot.js');
+const { Client } = require('pg');
 
-// const pgClient = new Client({
-//     connectionString: process.env.POSTGRES_CONNECTION_STRING,
-//     ssl: {
-//         rejectUnauthorized: false,  // Necessary for Heroku
-//     },
-// });
+const pgClient = new Client({
+    connectionString: process.env.POSTGRES_CONNECTION_STRING,
+    ssl: isProduction ? {
+      rejectUnauthorized: false, // Necessary for Heroku
+    } : false,
+});
 
-// pgClient.connect();
+pgClient.connect();
 
 // Function to check if the "messages" table exists and create it if not
 async function ensureTableExists() {
@@ -44,13 +44,21 @@ module.exports = {
         .setDescription('Replies with Pong!'),
     async execute(interaction) {
         try {
-            // Use pgClient to interact with the database
+            // Ensure the table exists before trying to insert into it
+            await ensureTableExists();
+
+            // Insert 'hello' into the messages table
             await pgClient.query("INSERT INTO messages(content) VALUES($1)", ['hello']);
-            await interaction.reply('Pong! Added "hello" to the database.');
+
+            // Reply to the interaction
+            await interaction.reply('Pong!');
+
+            console.log("Added 'hello' to the database.");
         } catch (error) {
-            console.error('Database interaction failed:', error);
+            console.error('Error during database operation or interaction:', error);
+
+            // Reply with an error message
             await interaction.reply('Failed to interact with the database.');
         }
     },
-
 };

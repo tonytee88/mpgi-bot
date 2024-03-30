@@ -15,7 +15,7 @@ app.listen(PORT, () => {
 
 //const Discord = require('discord.js')
 //const { Client, GatewayIntentBits } = require('discord.js');
-const { Client, Intents } = require('discord.js');
+const { Client, GatewayIntentBits: Intents } = require('discord.js');
 
 //const client = new Discord.Client({
 //    intents: [GatewayIntentBits.FLAGS.GUILDS, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, ]

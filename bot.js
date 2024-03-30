@@ -13,14 +13,16 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-//const Discord = require('discord.js')
-//const { Client, GatewayIntentBits } = require('discord.js');
-const { Client } = require('discord.js');
 
-//const client = new Discord.Client({
+// Require the necessary discord.js classes
+const { Client, Events, GatewayIntentBits } = require('discord.js');
+const { token } = require('./config.json');
+
+// Create a new client instance
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
 //    intents: [GatewayIntentBits.FLAGS.GUILDS, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, ]
-//});
-const client = new Client({ intents: 1 });
+
 const token = process.env.DISCORD_BOT_TOKEN;
 
 const { Client: pgClient } = require('pg');
@@ -34,8 +36,8 @@ const pg_Client = new pgClient({
 pg_Client.connect();
 console.log("client connected")
 
-client.on('ready', () => {
-    console.log(`Logged in as ${client.user.tag}!`);
+client.once(Events.ClientReady, readyClient => {
+	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
 // clientdiscord.on('message', async (msg) => {

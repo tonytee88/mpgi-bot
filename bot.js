@@ -14,25 +14,25 @@ app.listen(PORT, () => {
 });
 
 const Discord = require('discord.js')
-const { Client: clientDiscord, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits } = require('discord.js');
 
-const clientdiscord1 = new Discord.clientDiscord({
+const client = new Discord.Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, ]
 });
 const token = process.env.DISCORD_BOT_TOKEN;
 
-const { Client } = require('pg');
-const client = new Client({
+const { Client: pgClient } = require('pg');
+const pg_Client = new pgClient({
     connectionString: process.env.POSTGRES_CONNECTION_STRING,
     ssl: {
       rejectUnauthorized: false,  // allows connection to Heroku PostgreSQL without a valid certificate
     },
   });
 
-client.connect();
+pg_Client.connect();
 console.log("client connected")
 
-clientdiscord1.on('ready', () => {
+client.on('ready', () => {
     console.log(`Logged in as ${clientdiscord1.user.tag}!`);
 });
 
@@ -77,7 +77,7 @@ clientdiscord1.on('ready', () => {
 
 
 //test simply hello
-clientdiscord1.on('message', message => {
+client.on('message', message => {
     // Ignore messages from the bot itself or other bots to prevent loops or unnecessary processing.
    console.log("message read in channel")
     if (message.author.bot) return;
@@ -134,5 +134,5 @@ clientdiscord1.on('message', message => {
 // });
 
 //end of pg.test
-clientdiscord1.login(token);
+client.login(token);
 

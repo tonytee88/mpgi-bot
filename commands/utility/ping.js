@@ -1,14 +1,14 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { Client } = require('pg');
 
-const pgClient = new Client({
-    connectionString: process.env.POSTGRES_CONNECTION_STRING,
-    ssl: {
-        rejectUnauthorized: false,  // Necessary for Heroku
-    },
-});
+// const pgClient = new Client({
+//     connectionString: process.env.POSTGRES_CONNECTION_STRING,
+//     ssl: {
+//         rejectUnauthorized: false,  // Necessary for Heroku
+//     },
+// });
 
-pgClient.connect();
+// pgClient.connect();
 
 // Function to check if the "messages" table exists and create it if not
 async function ensureTableExists() {

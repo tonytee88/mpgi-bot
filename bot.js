@@ -15,7 +15,7 @@ app.listen(PORT, () => {
 
 const { Client: clientDiscord, GatewayIntentBits } = require('discord.js');
 
-const clientdiscord = new clientDiscord({
+const clientdiscord1 = new clientDiscord({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, ]
 });
 const token = process.env.DISCORD_BOT_TOKEN;
@@ -31,8 +31,8 @@ const client = new Client({
 client.connect();
 console.log("client connected")
 
-clientdiscord.on('ready', () => {
-    console.log(`Logged in as ${clientdiscord.user.tag}!`);
+clientdiscord1.on('ready', () => {
+    console.log(`Logged in as ${clientdiscord1.user.tag}!`);
 });
 
 // clientdiscord.on('message', async (msg) => {
@@ -73,10 +73,10 @@ clientdiscord.on('ready', () => {
 //     msg.reply("hello"); // Reply "hello" here
 //     msg.reply(`hello: ${progressIndicator}`); // Show progress after incrementing
 // }
-clientdiscord.login(token);
+clientdiscord1.login(token);
 
 //test simply hello
-clientdiscord.on('message', message => {
+clientdiscord1.on('message', message => {
     // Ignore messages from the bot itself or other bots to prevent loops or unnecessary processing.
    console.log("message read in channel")
     if (msg.author.bot) return;
@@ -86,7 +86,7 @@ clientdiscord.on('message', message => {
 });
 
 //test pg connect + query
-clientdiscord.on('message', async (message) => {
+clientdiscord1.on('message', async (message) => {
     if (message.author.bot) return;
 
     // Command to list all tables

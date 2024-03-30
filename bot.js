@@ -13,12 +13,14 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-const Discord = require('discord.js')
-const { Client, GatewayIntentBits } = require('discord.js');
+//const Discord = require('discord.js')
+//const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, Intents } = require('discord.js');
 
-const client = new Discord.Client({
-    intents: [GatewayIntentBits.FLAGS.GUILDS, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, ]
-});
+//const client = new Discord.Client({
+//    intents: [GatewayIntentBits.FLAGS.GUILDS, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, ]
+//});
+const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 const token = process.env.DISCORD_BOT_TOKEN;
 
 const { Client: pgClient } = require('pg');

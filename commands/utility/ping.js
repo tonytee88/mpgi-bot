@@ -3,9 +3,9 @@ const { Client } = require('pg');
 
 const pgClient = new Client({
     connectionString: process.env.POSTGRES_CONNECTION_STRING,
-    ssl: isProduction ? {
-      rejectUnauthorized: false, // Necessary for Heroku
-    } : false,
+    ssl: {
+        rejectUnauthorized: false,  // Necessary for Heroku
+    },
 });
 
 pgClient.connect();

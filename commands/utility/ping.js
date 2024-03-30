@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { Client } = require('pg');
+const { pgClient } = require('../../bot.js');
 
 // const pgClient = new Client({
 //     connectionString: process.env.POSTGRES_CONNECTION_STRING,
@@ -44,21 +44,13 @@ module.exports = {
         .setDescription('Replies with Pong!'),
     async execute(interaction) {
         try {
-            // Ensure the table exists before trying to insert into it
-            await ensureTableExists();
-
-            // Insert 'hello' into the messages table
+            // Use pgClient to interact with the database
             await pgClient.query("INSERT INTO messages(content) VALUES($1)", ['hello']);
-
-            // Reply to the interaction
-            await interaction.reply('Pong!');
-
-            console.log("Added 'hello' to the database.");
+            await interaction.reply('Pong! Added "hello" to the database.');
         } catch (error) {
-            console.error('Error during database operation or interaction:', error);
-
-            // Reply with an error message
+            console.error('Database interaction failed:', error);
             await interaction.reply('Failed to interact with the database.');
         }
     },
+
 };

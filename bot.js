@@ -181,4 +181,4 @@ client.once(Events.ClientReady, readyClient => {
 
 //end of pg.test
 client.login(token);
-
+module.exports.pgClient = pg_Client;

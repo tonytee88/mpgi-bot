@@ -33,7 +33,7 @@ pg_Client.connect();
 console.log("client connected")
 
 client.on('ready', () => {
-    console.log(`Logged in as ${clientdiscord1.user.tag}!`);
+    console.log(`Logged in as ${client.user.tag}!`);
 });
 
 // clientdiscord.on('message', async (msg) => {

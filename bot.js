@@ -13,16 +13,59 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+const fs = require('node:fs');
+const path = require('node:path');
+const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 
-// Require the necessary discord.js classes
-const { Client, Events, GatewayIntentBits } = require('discord.js');
-
-// Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const token = process.env.DISCORD_BOT_TOKEN;
+
+client.commands = new Collection();
+
+const foldersPath = path.join(__dirname, 'commands');
+const commandFolders = fs.readdirSync(foldersPath);
+
+for (const folder of commandFolders) {
+	const commandsPath = path.join(foldersPath, folder);
+	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+	for (const file of commandFiles) {
+		const filePath = path.join(commandsPath, file);
+		const command = require(filePath);
+		// Set a new item in the Collection with the key as the command name and the value as the exported module
+		if ('data' in command && 'execute' in command) {
+			client.commands.set(command.data.name, command);
+		} else {
+			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+		}
+	}
+}
 
 //    intents: [GatewayIntentBits.FLAGS.GUILDS, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, ]
 
-const token = process.env.DISCORD_BOT_TOKEN;
+
+client.on(Events.InteractionCreate, async interaction => {
+    if (!interaction.isChatInputCommand()) return;
+    console.log(interaction);
+	const command = interaction.client.commands.get(interaction.commandName);
+
+	if (!command) {
+		console.error(`No command matching ${interaction.commandName} was found.`);
+		return;
+	}
+
+	try {
+		await command.execute(interaction);
+	} catch (error) {
+		console.error(error);
+		if (interaction.replied || interaction.deferred) {
+			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+		} else {
+			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		}
+	}
+});
+
+
 
 const { Client: pgClient } = require('pg');
 const pg_Client = new pgClient({
@@ -80,15 +123,15 @@ client.once(Events.ClientReady, readyClient => {
 
 
 //test simply hello
-client.on('message', message => {
-    // Ignore messages from the bot itself or other bots to prevent loops or unnecessary processing.
-   console.log("message read in channel")
-    if (message.author.bot) return;
-    if (message.content.includes('hello')) {
-    message.channel.send("hey nice job");
-    }
+// client.on('message', message => {
+//     // Ignore messages from the bot itself or other bots to prevent loops or unnecessary processing.
+//    console.log("message read in channel")
+//     if (message.author.bot) return;
+//     if (message.content.includes('hello')) {
+//     message.channel.send("hey nice job");
+//     }
 
-});
+// });
 
 //test pg connect + query
 // clientdiscord1.on('message', async (message) => {

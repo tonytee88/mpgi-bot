@@ -13,9 +13,10 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+const Discord = require('discord.js')
 const { Client: clientDiscord, GatewayIntentBits } = require('discord.js');
 
-const clientdiscord1 = new clientDiscord({
+const clientdiscord1 = new Discord.clientDiscord({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, ]
 });
 const token = process.env.DISCORD_BOT_TOKEN;

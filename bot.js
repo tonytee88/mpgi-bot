@@ -101,8 +101,6 @@ client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
-module.exports = {
-        ingredients
-  };
+module.exports.ingredients = ingredients;
 
 client.login(token);

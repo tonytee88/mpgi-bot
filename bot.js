@@ -94,8 +94,8 @@ client.on(Events.InteractionCreate, async interaction => {
 //     },
 //   });
 
-pg_Client.connect();
-console.log("client connected")
+//pg_Client.connect();
+//console.log("client connected")
 
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);

@@ -10,6 +10,7 @@ const pgClient = new Client({
 });
 
 pgClient.connect();
+console.log("client connected")
 
 // Function to check if the "messages" table exists and create it if not
 async function ensureTableExists() {

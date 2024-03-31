@@ -9,10 +9,10 @@ const pgClient = new Client({
     },
 });
 
-pgClient.connect();
+
 console.log("client connected")
 
-// Function to check if the "messages" table exists and create it if not
+//Function to check if the "messages" table exists and create it if not
 async function ensureTableExists() {
     const tableExistsQuery = `
         SELECT EXISTS (
@@ -52,8 +52,8 @@ module.exports = {
             // Insert 'hello' into the messages table
             await pgClient.query("INSERT INTO messages(content) VALUES($1)", ['hello']);
 
-            // Reply to the interaction
-            await interaction.reply('Pongo!');
+            //Reply to the interaction
+            await interaction.reply('Pong!');
 
             console.log("Added 'hello' to the database.");
         } catch (error) {

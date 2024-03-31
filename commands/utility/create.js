@@ -21,6 +21,16 @@ const ingredients = {
   'Why': 1
 };
 
+const pgClient = new Client({
+  connectionString: process.env.POSTGRES_CONNECTION_STRING,
+  ssl: {
+      rejectUnauthorized: false,  // Necessary for Heroku
+  },
+});
+
+pgClient.connect();
+console.log("client connected (create)")
+
 module.exports = {
     data: new SlashCommandBuilder()
       .setName('create')

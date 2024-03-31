@@ -9,6 +9,8 @@ const pgClient = new Client({
 });
 
 pgClient.connect();
+pgClient.connect();
+console.log("client connected (server)")
 
 module.exports = {
     data: new SlashCommandBuilder()

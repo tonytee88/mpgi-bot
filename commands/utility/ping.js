@@ -52,7 +52,7 @@ module.exports = {
             await pgClient.query("INSERT INTO messages(content) VALUES($1)", ['hello']);
 
             // Reply to the interaction
-            await interaction.reply('Pong!');
+            await interaction.reply('Pongo!');
 
             console.log("Added 'hello' to the database.");
         } catch (error) {

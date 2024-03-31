@@ -86,13 +86,13 @@ client.on(Events.InteractionCreate, async interaction => {
 
 
 
-const { Client: pgClient } = require('pg');
-const pg_Client = new pgClient({
-    connectionString: process.env.POSTGRES_CONNECTION_STRING,
-    ssl: {
-      rejectUnauthorized: false,  // allows connection to Heroku PostgreSQL without a valid certificate
-    },
-  });
+// const { Client: pgClient } = require('pg');
+// const pg_Client = new pgClient({
+//     connectionString: process.env.POSTGRES_CONNECTION_STRING,
+//     ssl: {
+//       rejectUnauthorized: false,  // allows connection to Heroku PostgreSQL without a valid certificate
+//     },
+//   });
 
 pg_Client.connect();
 console.log("client connected")

@@ -101,7 +101,9 @@ client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
-module.exports.ingredients = ingredients;
-module.exports.pgClient = pg_Client;
+
 
 client.login(token);
+
+module.exports.ingredients = ingredients;
+module.exports.pgClient = pg_Client;

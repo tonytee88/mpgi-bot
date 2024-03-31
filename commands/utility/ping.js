@@ -42,7 +42,7 @@ async function ensureTableExists() {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('ping')
-        .setDescription('Replies with Pongo!'),
+        .setDescription('Replies with Pong!'),
     async execute(interaction) {
         try {
             // Ensure the table exists before trying to insert into it

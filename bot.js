@@ -102,5 +102,6 @@ client.once(Events.ClientReady, readyClient => {
 });
 
 module.exports.ingredients = ingredients;
+module.exports.pgClient = pg_Client;
 
 client.login(token);

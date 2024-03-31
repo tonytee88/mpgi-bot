@@ -1,14 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { Client } = require('pg');
-
-const pgClient = new Client({
-    connectionString: process.env.POSTGRES_CONNECTION_STRING,
-    ssl: {
-        rejectUnauthorized: false,  // Necessary for Heroku
-    },
-});
-
-pgClient.connect();
+const { pgClient } = require('../../bot.js');
 
 // Function to check if the "messages" table exists and create it if not
 async function ensureTableExists() {
@@ -41,7 +33,7 @@ async function ensureTableExists() {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('ping')
-        .setDescription('Replies with Pong!'),
+        .setDescription('Replies with Pongo!'),
     async execute(interaction) {
         try {
             // Ensure the table exists before trying to insert into it

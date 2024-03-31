@@ -9,7 +9,7 @@ const { pgClient } = require('../../bot.js');
 //     },
 // });
 
-//pgClient.connect();
+pgClient.connect();
 
 // Function to check if the "messages" table exists and create it if not
 async function ensureTableExists() {

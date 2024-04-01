@@ -1,4 +1,3 @@
-// add.js within commands/utility folder
 const { SlashCommandBuilder } = require('discord.js');
 const { Client } = require('pg');
 const stringSimilarity = require('string-similarity');
@@ -34,10 +33,30 @@ console.log("client connected (add)");
 
 const ingredientsList = Object.keys(ingredients).map(ingredient => ingredient.toLowerCase());
 
+const ensureActivityLogTableExists = async () => {
+    const createTableQuery = `
+        CREATE TABLE IF NOT EXISTS activity_logs (
+            id SERIAL PRIMARY KEY,
+            category_id INT,
+            activity_note TEXT NOT NULL,
+            activity_date DATE NOT NULL,
+            FOREIGN KEY (category_id) REFERENCES categories (id)
+        );
+    `;
+
+    try {
+        await pgClient.query(createTableQuery);
+        console.log('Ensured activity_logs table exists.');
+    } catch (error) {
+        console.error('Error ensuring activity_logs table exists:', error);
+        throw error;
+    }
+};
+
 module.exports = {
-  data: new SlashCommandBuilder()
+    data: new SlashCommandBuilder()
     .setName('add')
-    .setDescription('Adds a value to a category in a specified table.')
+    .setDescription('Adds a value to a category in a specified table, with a description of the activity.')
     .addStringOption(option =>
       option.setName('tablename')
         .setDescription('The name of the table to update')
@@ -49,35 +68,54 @@ module.exports = {
     .addIntegerOption(option =>
       option.setName('value')
         .setDescription('The value to add')
+        .setRequired(true))
+    .addStringOption(option =>
+      option.setName('activitynote')
+        .setDescription('Description of the task that was accomplished')
         .setRequired(true)),
-  async execute(interaction) {
-    const tableName = interaction.options.getString('tablename');
-    const userCategory = interaction.options.getString('category');
-    const value = interaction.options.getInteger('value');
-
-    const normalizedInput = userCategory.toLowerCase();
-    const matches = stringSimilarity.findBestMatch(normalizedInput, ingredientsList);
-
-    // Respond with an error message if no similar ingredient is found
-    if (matches.bestMatch.rating < 0.8) {  // Adjust this threshold as needed
-      await interaction.reply("Please enter a valid category.");
-      return;
-    }
-
-    const matchedIngredient = matches.bestMatch.target;
-
-    const updateQuery = `
-      UPDATE "${tableName}"
-      SET score = score + $1
-      WHERE LOWER(ingredient) = $2;
-    `;
-
-    try {
-      await pgClient.query(updateQuery, [value, matchedIngredient]);
-      await interaction.reply(`Added ${value} to ${matchedIngredient} in table ${tableName}.`);
-    } catch (error) {
-      console.error('Error updating category:', error);
-      await interaction.reply(`Failed to update ${matchedIngredient} in table ${tableName}.`);
-    }
-  },
+        async execute(interaction) {
+            await ensureActivityLogTableExists();
+            
+            const tableName = interaction.options.getString('tablename');
+            const userCategory = interaction.options.getString('category');
+            const value = interaction.options.getInteger('value');
+            const activityNote = interaction.options.getString('activitynote');
+            const currentDate = new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' }).toUpperCase();
+        
+            const normalizedInput = userCategory.toLowerCase();
+            const matches = stringSimilarity.findBestMatch(normalizedInput, ingredientsList);
+        
+            if (matches.bestMatch.rating < 0.8) {
+              await interaction.reply("Please enter a valid category.");
+              return;
+            }
+        
+            const matchedIngredient = matches.bestMatch.target;
+        
+            // Begin transaction for updating score and logging activity
+            try {
+              await pgClient.query('BEGIN');
+        
+              const updateScoreQuery = `
+                UPDATE "${tableName}"
+                SET score = score + $1
+                WHERE LOWER(ingredient) = $2;
+              `;
+              await pgClient.query(updateScoreQuery, [value, matchedIngredient]);
+        
+              const logActivityQuery = `
+                INSERT INTO activity_logs (table_name, ingredient, activity_note, activity_date)
+                VALUES ($1, $2, $3, TO_DATE($4, 'MON-DD-YYYY'));
+              `;
+              await pgClient.query(logActivityQuery, [tableName, matchedIngredient, activityNote, currentDate]);
+        
+              await pgClient.query('COMMIT');
+              
+              await interaction.reply(`Added ${value} to ${matchedIngredient} with note: '${activityNote}' on ${currentDate} in table ${tableName}.`);
+            } catch (error) {
+              await pgClient.query('ROLLBACK');
+              console.error('Error updating category or logging activity:', error);
+              await interaction.reply(`Failed to update ${matchedIngredient} or log activity in table ${tableName}.`);
+            }
+          },
 };

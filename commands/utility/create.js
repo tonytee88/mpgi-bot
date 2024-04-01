@@ -26,7 +26,6 @@ const pgClient = new Client({
       rejectUnauthorized: false,
   },
 });
-
 pgClient.connect();
 console.log("client connected (create)");
 

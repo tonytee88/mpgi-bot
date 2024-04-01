@@ -85,23 +85,20 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 
-
-// const { Client: pgClient } = require('pg');
-// const pg_Client = new pgClient({
-//     connectionString: process.env.POSTGRES_CONNECTION_STRING,
-//     ssl: {
-//       rejectUnauthorized: false,  // allows connection to Heroku PostgreSQL without a valid certificate
-//     },
-//   });
-
-//pg_Client.connect();
-//console.log("client connected")
-
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
+const lastMessageAttachments = new Map();
 
+client.on('messageCreate', async (message) => {
+    // Ignore messages without attachments or from bots.
+    if (message.author.bot || message.attachments.size === 0) return;
+  
+    // Store the latest message with attachment per channel.
+    lastMessageAttachments.set(message.channelId, message.attachments.first().url);
+    console.log(lastMessageAttachments)
+  });
 
 client.login(token);
 

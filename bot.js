@@ -100,6 +100,11 @@ client.on('messageCreate', async (message) => {
     console.log(lastMessageAttachments)
   });
 
+  client.on("messageCreate", function(message){
+    console.log(`a message was created`);
+    console.log({message});
+});
+
 client.login(token);
 
 module.exports.ingredients = ingredients;

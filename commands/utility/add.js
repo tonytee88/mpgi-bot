@@ -8,6 +8,8 @@ const pgClient = new Client({
         rejectUnauthorized: false,  // Necessary for Heroku
     },
     });
+pgClient.connect();
+console.log("client connected (add)")
 
 module.exports = {
   data: new SlashCommandBuilder()

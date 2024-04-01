@@ -105,7 +105,7 @@ module.exports = {
         
               const logActivityQuery = `
                 INSERT INTO activity_logs (table_name, ingredient, activity_note, activity_date)
-                VALUES ($1, $2, $3, TO_DATE($4, 'MON-DD-YYYY'));
+                VALUES ($1, $2, $3, TO_DATE($4, 'DD-MON-YYYY'));
               `;
               await pgClient.query(logActivityQuery, [tableName, matchedIngredient, activityNote, currentDate]);
         

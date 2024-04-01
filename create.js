@@ -1,6 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { Client } = require('pg');
-//const { ingredients } = require('../../bot.js');
 
 const ingredients = {
   'Cooking': 50,
@@ -24,44 +23,54 @@ const ingredients = {
 const pgClient = new Client({
   connectionString: process.env.POSTGRES_CONNECTION_STRING,
   ssl: {
-      rejectUnauthorized: false,  // Necessary for Heroku
+      rejectUnauthorized: false,
   },
 });
 
 pgClient.connect();
-console.log("client connected (create)")
+console.log("client connected (create)");
 
 module.exports = {
   data: new SlashCommandBuilder()
-      .setName('create')
-      .setDescription('Creates a new goal tracking table.')
-      .addStringOption(option =>
-          option.setName('tablename')
-              .setDescription('The name of the table to create')
-              .setRequired(true)),
+    .setName('create')
+    .setDescription('Creates a new goal tracking table.')
+    .addStringOption(option =>
+      option.setName('tablename')
+        .setDescription('The name of the table to create')
+        .setRequired(true)),
   async execute(interaction) {
-      const tableName = interaction.options.getString('tablename');
+    const tableName = interaction.options.getString('tablename');
 
-      // Validate table name to be alphanumeric with underscores
-      if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(tableName)) {
-          await interaction.reply('Invalid table name. Table names must be alphanumeric and may contain underscores.');
-          return;
-      }
+    // Validate table name to be alphanumeric with underscores
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(tableName)) {
+        await interaction.reply('Invalid table name. Table names must be alphanumeric and may contain underscores.');
+        return;
+    }
 
-      let createTableQuery = `CREATE TABLE "${tableName}" (id SERIAL PRIMARY KEY, `;
-      Object.keys(ingredients).forEach((key, index, array) => {
-          let columnName = key.replace(/\s+/g, '_').toLowerCase();
-          createTableQuery += `"${columnName}" INT DEFAULT 0`;
-          if (index < array.length - 1) createTableQuery += ', ';
-      });
-      createTableQuery += ');';
+    let createTableQuery = `
+      CREATE TABLE "${tableName}" (
+        id SERIAL PRIMARY KEY,
+        ingredient VARCHAR(255) NOT NULL,
+        score INT DEFAULT 0,
+        goal INT NOT NULL
+      );
+    `;
 
-      try {
-          await pgClient.query(createTableQuery);
-          await interaction.reply(`Table "${tableName}" created successfully.`);
-      } catch (error) {
-          console.error('Error creating table:', error);
-          await interaction.reply(`Failed to create table "${tableName}".`);
-      }
+    try {
+        await pgClient.query(createTableQuery);
+        
+        for (const [ingredient, goal] of Object.entries(ingredients)) {
+            let insertQuery = `
+              INSERT INTO "${tableName}" (ingredient, goal) 
+              VALUES ($1, $2);
+            `;
+            await pgClient.query(insertQuery, [ingredient, goal]);
+        }
+        
+        await interaction.reply(`Table "${tableName}" created and populated successfully.`);
+    } catch (error) {
+        console.error('Error creating and populating table:', error);
+        await interaction.reply(`Failed to create and populate table "${tableName}".`);
+    }
   },
 };

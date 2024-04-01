@@ -37,10 +37,10 @@ const ensureActivityLogTableExists = async () => {
     const createTableQuery = `
         CREATE TABLE IF NOT EXISTS activity_logs (
             id SERIAL PRIMARY KEY,
-            category_id INT,
+            table_name VARCHAR(255) NOT NULL,
+            ingredient VARCHAR(255) NOT NULL,
             activity_note TEXT NOT NULL,
-            activity_date DATE NOT NULL,
-            FOREIGN KEY (category_id) REFERENCES categories (id)
+            activity_date DATE NOT NULL
         );
     `;
 

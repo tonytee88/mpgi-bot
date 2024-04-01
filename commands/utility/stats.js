@@ -7,7 +7,7 @@ const pgClient = new Client({
         rejectUnauthorized: false,  // Necessary for Heroku
     },
 });
-pgClient.connect();
+//pgClient.connect();
 console.log("client connected (stats)");
 
 const ingredients = {

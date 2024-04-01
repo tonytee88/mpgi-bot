@@ -41,10 +41,8 @@ module.exports = {
    async execute(interaction) {
      const tableName = interaction.options.getString('tablename');
      const selectQuery = `SELECT * FROM ${tableName};`;
-    console.log("test2")
 
     try {
-      console.log("test")
       const res = await pgClient.query(selectQuery);
       let replyMessage = `Current Stats for ${tableName}:\n`;
       

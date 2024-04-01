@@ -49,9 +49,9 @@ const ensureActivityLogTableExists = async () => {
         console.log('Ensured activity_logs table exists.');
     } catch (error) {
         console.error('Error ensuring activity_logs table exists:', error);
-        throw error;
     }
 };
+
 
 module.exports = {
     data: new SlashCommandBuilder()

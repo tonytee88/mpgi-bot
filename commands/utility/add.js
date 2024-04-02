@@ -21,8 +21,9 @@ const ingredients = {
 client.on('interactionCreate', async (interaction) => {
     if (interaction.isAutocomplete() && interaction.commandName === 'add') {
         const focusedValue = interaction.options.getFocused(true);
-
+        console.log("condition: autocomplete on and is add.js")
         if (focusedValue.name === 'category') {
+            console.log("field is category")
             const choices = Object.keys(ingredients);
             const filtered = choices.filter(choice => choice.toLowerCase().includes(focusedValue.value.toLowerCase()));
             

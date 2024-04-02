@@ -101,9 +101,15 @@ const ensureActivityLogTableExists = async () => {
     }
 };
 
-async function fetchTableNames(pgClient) {
-    // Adjust the query if you have a specific schema or naming convention
-    const result = await pgClient.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND column_name = 'category'");
+async function fetchTableNamesWithCategory(pgClient) {
+    const query = `
+        SELECT DISTINCT table_name 
+        FROM information_schema.columns 
+        WHERE table_schema = 'public'
+        AND column_name = 'category';
+    `;
+
+    const result = await pgClient.query(query);
     return result.rows.map(row => row.table_name);
 }
 

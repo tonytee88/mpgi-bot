@@ -121,10 +121,10 @@ module.exports = {
         .addAttachmentOption(option => option.setName('image').setDescription('Optional image to upload').setRequired(false)),
     async autocomplete(interaction) {
             const focusedValue = interaction.options.getFocused();
-            //const choices = Object.keys(ingredients).map(ingredient => ingredient);
-            const choices = ['Popular Topics: Threads', 'Sharding: Getting started', 'Library: Voice Connections', 'Interactions: Replying to slash commands', 'Popular Topics: Embed preview'];
-            //const filtered = choices.filter(choice => choice.toLowerCase().includes(focusedValue.toLowerCase()));
-            const filtered = choices.filter(choice => choice.startsWith(focusedValue));
+            const choices = Object.keys(ingredients).map(ingredient => ingredient);
+            //const choices = ['Popular Topics: Threads', 'Sharding: Getting started', 'Library: Voice Connections', 'Interactions: Replying to slash commands', 'Popular Topics: Embed preview'];
+            const filtered = choices.filter(choice => choice.toLowerCase().includes(focusedValue.toLowerCase()));
+            //const filtered = choices.filter(choice => choice.startsWith(focusedValue));
             await interaction.respond(
                 filtered.slice(0, 25).map(choice => ({ name: choice, value: choice.toLowerCase().replace(/\s+/g, '_') }))
             );

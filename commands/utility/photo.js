@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, MessageEmbed } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const { Upload } = require('@aws-sdk/lib-storage');
 const fetch = require('node-fetch');
@@ -53,7 +53,7 @@ module.exports = {
         
         try {
             const s3Data = await uploadImageToS3(file.url, process.env.AWS_S3_BUCKET_NAME);
-            const emb = new MessageEmbed()
+            const emb = new EmbedBuilder()
                 .setAuthor({ name: user.username, iconURL: user.displayAvatarURL({ dynamic: true }) })
                 .setTitle('Embed Message /w attachment')
                 .setDescription('Attachment uploaded successfully!')

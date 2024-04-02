@@ -133,15 +133,15 @@ module.exports = {
 
             if (focusedOption.name === 'tablename') {
                 const tableNames = await fetchTableNames(pgClient);
-                choices = tableNames;
+                choices = tableNames.map(tableName => ({ name: tableName, value: tableName }));
+            } else if (focusedOption.name === 'category') {
+                choices = Object.keys(ingredients).map(ingredient => ({ name: ingredient, value: ingredient }));
             }
-
-            if (focusedOption.name === 'category') {
-                choices = Object.keys(ingredients).map(ingredient => ingredient);
-            }
-            const filtered = choices.filter(choice => choice.toLowerCase().includes(focusedOption.value.toLowerCase()));
+        
+            const focusedValue = focusedOption.value;
+            const filtered = choices.filter(choice => choice.name.toLowerCase().includes(focusedValue.toLowerCase()));
             await interaction.respond(
-                filtered.slice(0, 25).map(choice => ({ name: choice, value: choice.toLowerCase().replace(/\s+/g, '_') }))
+                filtered.slice(0, 25).map(choice => ({ name: choice.name, value: choice.value.toLowerCase().replace(/\s+/g, '_') }))
             );
         },       
     async execute(interaction) {

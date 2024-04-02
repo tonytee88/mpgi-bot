@@ -18,7 +18,7 @@ const ingredients = {
     'Learn': 5, 'Surprise': 5, 'What': 1, 'Who': 1, 'How': 1, 'Why': 1
 };
 
-client.on('interactionCreate', async (interaction) => {
+client.on(Events.InteractionCreate, async (interaction) => {
     if (interaction.isAutocomplete() && interaction.commandName === 'add') {
         const focusedValue = interaction.options.getFocused(true);
         console.log("condition: autocomplete on and is add.js")

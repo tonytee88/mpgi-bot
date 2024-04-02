@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, MessageEmbed } = require('discord.js');
 const AWS = require('aws-sdk');
 const fetch = require('node-fetch');
+//test
 
 AWS.config.update({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,

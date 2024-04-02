@@ -56,8 +56,8 @@ const pgClient = new Client({
 });
 
 // Ensure the connection is established before any query execution
-pgClient.connect().then(() => console.log("client connected (add)"))
-                 .catch((e) => console.error('Failed to connect to PostgreSQL', e));
+//pgClient.connect().then(() => console.log("client connected (add)"))
+  //               .catch((e) => console.error('Failed to connect to PostgreSQL', e));
 
 const ensureActivityLogTableExists = async () => {
     const createTableQuery = `
@@ -93,7 +93,14 @@ module.exports = {
         .setName('add')
         .setDescription('Adds a value to a category in a specified table, with a description of the activity.')
         .addStringOption(option => option.setName('tablename').setDescription('The name of the table to update').setRequired(true))
-        .addStringOption(option => option.setName('category').setDescription('The category to increment').setRequired(true))
+        .addStringOption(option => 
+            option.setName('category')
+            .setDescription('The category to increment:')
+            .setRequired(true)
+            .addStringChoices(
+                ...Object.keys(ingredients).map((ingredient) => [ingredient, ingredient.toLowerCase().replace(/\s/g, '_')])
+            )
+        )
         .addIntegerOption(option => option.setName('value').setDescription('The value to add').setRequired(true))
         .addStringOption(option => option.setName('activitynote').setDescription('Description of the task that was accomplished').setRequired(true))
         .addAttachmentOption(option => option.setName('image').setDescription('Optional image to upload').setRequired(false)),

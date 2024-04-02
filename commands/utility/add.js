@@ -19,6 +19,7 @@ const ingredients = {
 };
 
 client.on(Events.InteractionCreate, async (interaction) => {
+    console.log("interaction create events works")
     if (!interaction.isAutocomplete()) return;
 
     if (interaction.commandName === 'add' && interaction.options.getFocused(true).name === 'category') {

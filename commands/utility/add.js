@@ -89,21 +89,22 @@ const ingredients = {
 const ingredientsList = Object.keys(ingredients).map(ingredient => ingredient.toLowerCase());
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('add')
-        .setDescription('Adds a value to a category in a specified table, with a description of the activity.')
-        .addStringOption(option => option.setName('tablename').setDescription('The name of the table to update').setRequired(true))
-        .addStringOption(option => 
-            option.setName('category')
-            .setDescription('The category to increment:')
-            .setRequired(true)
-            .addStringChoices(
-                ...Object.keys(ingredients).map((ingredient) => [ingredient, ingredient.toLowerCase().replace(/\s/g, '_')])
-            )
-        )
-        .addIntegerOption(option => option.setName('value').setDescription('The value to add').setRequired(true))
-        .addStringOption(option => option.setName('activitynote').setDescription('Description of the task that was accomplished').setRequired(true))
-        .addAttachmentOption(option => option.setName('image').setDescription('Optional image to upload').setRequired(false)),
+    data = new SlashCommandBuilder()
+    .setName('add')
+    .setDescription('Adds a value to a category in a specified table, with a description of the activity.')
+    .addStringOption(option => option.setName('tablename').setDescription('The name of the table to update').setRequired(true))
+    .addStringOption(option =>
+        option.setName('category')
+        .setDescription('The category to increment:')
+        .setRequired(true)
+        // Add each ingredient as a choice. Format: .addStringChoices([name, value])
+        .addStringChoices(...Object.keys(ingredients).map((ingredient) => {
+            return { name: ingredient, value: ingredient.toLowerCase().replace(/\s/g, '_') };
+        }))
+    )
+    .addIntegerOption(option => option.setName('value').setDescription('The value to add').setRequired(true))
+    .addStringOption(option => option.setName('activitynote').setDescription('Description of the task that was accomplished').setRequired(true))
+    .addAttachmentOption(option => option.setName('image').setDescription('Optional image to upload').setRequired(false));
     async execute(interaction) {
         await ensureActivityLogTableExists();
         

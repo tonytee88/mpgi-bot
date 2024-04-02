@@ -103,7 +103,7 @@ const ensureActivityLogTableExists = async () => {
 
 async function fetchTableNames(pgClient) {
     // Adjust the query if you have a specific schema or naming convention
-    const result = await pgClient.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
+    const result = await pgClient.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND column_name = 'category'");
     return result.rows.map(row => row.table_name);
 }
 

@@ -62,21 +62,6 @@ const ingredients = {
     'Why': 1
   };
 
-  if (interaction.isAutocomplete()) {
-    const focusedValue = interaction.options.getFocused(true);
-    if (focusedValue.name === 'category') {
-        const choices = Object.keys(ingredients);
-        const filtered = choices.filter(choice => choice.toLowerCase().includes(focusedValue.value.toLowerCase()));
-        
-        // Limit the number of suggestions to prevent overwhelming the user.
-        const limited = filtered.slice(0, 25).map(choice => ({ name: choice, value: choice.toLowerCase().replace(/\s+/g, '_') }));
-        
-        await interaction.respond(
-            limited.map(choice => ({ name: choice.name, value: choice.value }))
-        );
-    }
-}
-
 client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isChatInputCommand()) return;
     console.log(interaction);

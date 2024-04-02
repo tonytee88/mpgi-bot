@@ -5,6 +5,26 @@ const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/clien
 const { Upload } = require('@aws-sdk/lib-storage');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const fetch = require('node-fetch');
+const { Client: discordClient, Collection, Events, GatewayIntentBits } = require('discord.js');
+
+const client = new discordClient({ intents: [GatewayIntentBits.Guilds] });
+
+//const token = process.env.DISCORD_BOT_TOKEN;
+
+client.on('interactionCreate', async (interaction) => {
+    if (interaction.isAutocomplete() && interaction.commandName === 'add') {
+        const focusedValue = interaction.options.getFocused(true);
+
+        if (focusedValue.name === 'category') {
+            const choices = Object.keys(ingredients);
+            const filtered = choices.filter(choice => choice.toLowerCase().includes(focusedValue.value.toLowerCase()));
+            
+            const limited = filtered.slice(0, 25).map(choice => ({ name: choice, value: choice.toLowerCase().replace(/\s+/g, '_') }));
+            
+            await interaction.respond(limited.map(choice => ({ name: choice.name, value: choice.value })));
+        }
+    }
+});
 
 // Initialize the S3 client
 const s3Client = new S3Client({

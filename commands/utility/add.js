@@ -19,18 +19,18 @@ const ingredients = {
 };
 
 client.on(Events.InteractionCreate, async (interaction) => {
-    if (interaction.isAutocomplete() && interaction.commandName === 'add') {
-        const focusedValue = interaction.options.getFocused(true);
-        console.log("condition: autocomplete on and is add.js")
-        if (focusedValue.name === 'category') {
-            console.log("field is category")
-            const choices = Object.keys(ingredients);
-            const filtered = choices.filter(choice => choice.toLowerCase().includes(focusedValue.value.toLowerCase()));
-            
-            const limited = filtered.slice(0, 25).map(choice => ({ name: choice, value: choice.toLowerCase().replace(/\s+/g, '_') }));
-            
-            await interaction.respond(limited.map(choice => ({ name: choice.name, value: choice.value })));
-        }
+    if (!interaction.isAutocomplete()) return;
+
+    if (interaction.commandName === 'add' && interaction.options.getFocused(true).name === 'category') {
+        const focusedValue = interaction.options.getFocused();
+
+        const choices = Object.keys(ingredients);
+        const filtered = choices
+            .filter(choice => choice.toLowerCase().includes(focusedValue.toLowerCase()))
+            .slice(0, 25)  // Limit the results to 25 as required by Discord
+            .map(choice => ({ name: choice, value: choice.toLowerCase().replace(/\s+/g, '_') }));
+
+        await interaction.respond(filtered.map(choice => ({ name: choice.name, value: choice.value })));
     }
 });
 

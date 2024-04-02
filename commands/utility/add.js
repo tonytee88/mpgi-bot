@@ -80,7 +80,6 @@ const pgClient = new Client({
 
 // Ensure the connection is established before any query execution
 pgClient.connect().then(() => console.log("client connected (add)"))
-                .catch((e) => console.error('Failed to connect to PostgreSQL', e));
 
 const ensureActivityLogTableExists = async () => {
     const createTableQuery = `

@@ -106,7 +106,8 @@ async function fetchTableNames(pgClient) {
         SELECT DISTINCT table_name 
         FROM information_schema.columns 
         WHERE table_schema = 'public'
-        AND column_name = 'category';
+        AND column_name = 'ingredient'
+        AND table_name != 'activity_logs';
     `;
 
     const result = await pgClient.query(query);

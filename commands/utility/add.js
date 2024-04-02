@@ -101,7 +101,7 @@ const ensureActivityLogTableExists = async () => {
     }
 };
 
-async function fetchTableNamesWithCategory(pgClient) {
+async function fetchTableNames(pgClient) {
     const query = `
         SELECT DISTINCT table_name 
         FROM information_schema.columns 

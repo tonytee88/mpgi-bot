@@ -11,6 +11,13 @@ const client = new discordClient({ intents: [GatewayIntentBits.Guilds] });
 
 //const token = process.env.DISCORD_BOT_TOKEN;
 
+const ingredients = {
+    'Cooking': 50, 'Work': 20, 'Social': 10, 'Give Back': 5,
+    'Husband Duty': 5, 'Fatherhood': 30, 'Body Health': 50,
+    'Home Ownership': 20, 'Create-Ship': 10, 'Share': 10,
+    'Learn': 5, 'Surprise': 5, 'What': 1, 'Who': 1, 'How': 1, 'Why': 1
+};
+
 client.on('interactionCreate', async (interaction) => {
     if (interaction.isAutocomplete() && interaction.commandName === 'add') {
         const focusedValue = interaction.options.getFocused(true);
@@ -99,12 +106,7 @@ const ensureActivityLogTableExists = async () => {
     }
 };
 
-const ingredients = {
-    'Cooking': 50, 'Work': 20, 'Social': 10, 'Give Back': 5,
-    'Husband Duty': 5, 'Fatherhood': 30, 'Body Health': 50,
-    'Home Ownership': 20, 'Create-Ship': 10, 'Share': 10,
-    'Learn': 5, 'Surprise': 5, 'What': 1, 'Who': 1, 'How': 1, 'Why': 1
-};
+
 
 const ingredientsList = Object.keys(ingredients).map(ingredient => ingredient.toLowerCase());
 

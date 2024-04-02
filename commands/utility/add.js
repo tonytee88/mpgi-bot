@@ -139,7 +139,7 @@ module.exports = {
             if (focusedOption.name === 'category') {
                 choices = Object.keys(ingredients).map(ingredient => ingredient);
             }
-            const filtered = choices.filter(choice => choice.toLowerCase().includes(focusedOption.toLowerCase()));
+            const filtered = choices.filter(choice => choice.toLowerCase().includes(focusedOption.value.toLowerCase()));
             await interaction.respond(
                 filtered.slice(0, 25).map(choice => ({ name: choice, value: choice.toLowerCase().replace(/\s+/g, '_') }))
             );

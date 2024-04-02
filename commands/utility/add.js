@@ -150,58 +150,61 @@ module.exports = {
                 filtered.slice(0, 25).map(choice => ({ name: choice.name, value: choice.value.toLowerCase().replace(/\s+/g, '_') }))
             );
         },       
-    async execute(interaction) {
-        await ensureActivityLogTableExists();
+        async execute(interaction) {
+            await interaction.deferReply();  // Acknowledge the interaction immediately.
+            
+            await ensureActivityLogTableExists();
+            
+            const tableName = interaction.options.getString('tablename');
+            const userCategory = interaction.options.getString('category');
+            const value = interaction.options.getInteger('value');
+            const activityNote = interaction.options.getString('activitynote');
+            const imageAttachment = interaction.options.getAttachment('image');
+            const currentDate = new Date().toISOString().split('T')[0];  // Format as YYYY-MM-DD
         
-        const tableName = interaction.options.getString('tablename');
-        const userCategory = interaction.options.getString('category');
-        const value = interaction.options.getInteger('value');
-        const activityNote = interaction.options.getString('activitynote');
-        const imageAttachment = interaction.options.getAttachment('image');
-        const currentDate = new Date().toISOString().split('T')[0];  // Format as YYYY-MM-DD
-
-        const normalizedInput = userCategory.toLowerCase();
-        const matches = stringSimilarity.findBestMatch(normalizedInput, ingredientsList);
-
-        if (matches.bestMatch.rating < 0.8) {
-            await interaction.reply("Please enter a valid category.");
-            return;
-        }
-
-        const matchedIngredient = matches.bestMatch.target;
-
-        let imageUrl = null;
-        if (imageAttachment) {
+            const normalizedInput = userCategory.toLowerCase();
+            const matches = stringSimilarity.findBestMatch(normalizedInput, ingredientsList);
+        
+            if (matches.bestMatch.rating < 0.8) {
+                await interaction.editReply("Please enter a valid category.");
+                return;
+            }
+        
+            const matchedIngredient = matches.bestMatch.target;
+            let imageUrl = null;
+        
+            if (imageAttachment) {
+                try {
+                    const { key, Bucket } = await uploadImageToS3(imageAttachment.url, process.env.AWS_S3_BUCKET_NAME);
+                    imageUrl = await generatePreSignedUrl(Bucket, key);
+                } catch (error) {
+                    console.error('Error uploading image to S3:', error);
+                }
+            }
+        
             try {
-                const { key, Bucket } = await uploadImageToS3(imageAttachment.url, process.env.AWS_S3_BUCKET_NAME);
-                imageUrl = await generatePreSignedUrl(Bucket, key);
+                await pgClient.query('BEGIN');
+        
+                const updateScoreQuery = `UPDATE "${tableName}" SET score = score + $1 WHERE LOWER(ingredient) = $2;`;
+                await pgClient.query(updateScoreQuery, [value, matchedIngredient.toLowerCase()]);
+        
+                const logActivityQuery = `INSERT INTO activity_logs (table_name, ingredient, activity_note, activity_date, image_url)
+                                          VALUES ($1, $2, $3, $4, $5);`;
+                await pgClient.query(logActivityQuery, [tableName, matchedIngredient, activityNote, currentDate, imageUrl]);
+        
+                await pgClient.query('COMMIT');
+        
+                let responseMessage = `Added ${value} to ${matchedIngredient} with note: '${activityNote}' on ${currentDate} in table ${tableName}.`;
+                if (imageUrl) {
+                    responseMessage += `\nImage URL (accessible for 1 hour): ${imageUrl}`;
+                }
+        
+                await interaction.editReply(responseMessage);  // Update the reply with the final message.
             } catch (error) {
-                console.error('Error uploading image to S3:', error);
+                await pgClient.query('ROLLBACK');
+                console.error('Error updating category or logging activity:', error);
+                await interaction.editReply(`Failed to update ${matchedIngredient} or log activity in table ${tableName}.`);
             }
-        }
-
-        try {
-            await pgClient.query('BEGIN');
-
-            const updateScoreQuery = `UPDATE "${tableName}" SET score = score + $1 WHERE LOWER(ingredient) = $2;`;
-            await pgClient.query(updateScoreQuery, [value, matchedIngredient.toLowerCase()]);
-
-            const logActivityQuery = `INSERT INTO activity_logs (table_name, ingredient, activity_note, activity_date, image_url)
-                                      VALUES ($1, $2, $3, $4, $5);`;
-            await pgClient.query(logActivityQuery, [tableName, matchedIngredient, activityNote, currentDate, imageUrl]);
-
-            await pgClient.query('COMMIT');
-
-            let responseMessage = `Added ${value} to ${matchedIngredient} with note: '${activityNote}' on ${currentDate} in table ${tableName}.`;
-            if (imageUrl) {
-                responseMessage += `\nImage URL (accessible for 1 hour): ${imageUrl}`;
-            }
-
-            await interaction.reply(responseMessage);
-        } catch (error) {
-            await pgClient.query('ROLLBACK');
-            console.error('Error updating category or logging activity:', error);
-            await interaction.reply(`Failed to update ${matchedIngredient} or log activity in table ${tableName}.`);
-        }
-    },
+        },
+        
 };

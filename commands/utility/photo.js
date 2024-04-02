@@ -1,37 +1,41 @@
 const { SlashCommandBuilder, MessageEmbed } = require('discord.js');
-const AWS = require('aws-sdk');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { Upload } = require('@aws-sdk/lib-storage');
 const fetch = require('node-fetch');
-//test
 
-AWS.config.update({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION
+// Initialize the S3 client
+const s3Client = new S3Client({
+    region: process.env.AWS_REGION,
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    }
 });
-
-const S3 = new AWS.S3();
 
 async function uploadImageToS3(imageUrl, bucketName) {
     const response = await fetch(imageUrl);
     if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
     const imageBuffer = await response.buffer();
-
     const imageKey = `images/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.png`;
 
-    return new Promise((resolve, reject) => {
-        S3.upload({
-            Bucket: bucketName,
-            Key: imageKey,
-            Body: imageBuffer,
-            ContentType: 'image/png',
-        }, (err, data) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(data);
-            }
+    // Using lib-storage to manage multipart upload
+    try {
+        const parallelUploads3 = new Upload({
+            client: s3Client,
+            params: {
+                Bucket: bucketName,
+                Key: imageKey,
+                Body: imageBuffer,
+                ContentType: 'image/png',
+            },
+            leavePartsOnError: false, // optional manually handle dropped parts
         });
-    });
+
+        const uploadResult = await parallelUploads3.done();
+        return uploadResult;
+    } catch (err) {
+        throw new Error(`Failed to upload image: ${err.message}`);
+    }
 }
 
 module.exports = {

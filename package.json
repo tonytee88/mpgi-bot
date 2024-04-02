@@ -10,8 +10,9 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@aws-sdk/client-s3": "^3.540.0",
+        "@aws-sdk/lib-storage": "^3.540.0",
         "@types/node": "^18.0.6",
-        "aws-sdk": "^2.1590.0",
         "discord.js": "^14.14.1",
         "express": "^4.19.2",
         "node-fetch": "^2.6.7",

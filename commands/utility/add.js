@@ -79,8 +79,8 @@ const pgClient = new Client({
 });
 
 // Ensure the connection is established before any query execution
-pgClient.connect().then(() => console.log("client connected (add)"))
-                 .catch((e) => console.error('Failed to connect to PostgreSQL', e));
+//pgClient.connect().then(() => console.log("client connected (add)"))
+//                 .catch((e) => console.error('Failed to connect to PostgreSQL', e));
 
 const ensureActivityLogTableExists = async () => {
     const createTableQuery = `
@@ -119,7 +119,7 @@ module.exports = {
         .addIntegerOption(option => option.setName('value').setDescription('The value to add').setRequired(true))
         .addStringOption(option => option.setName('activitynote').setDescription('Description of the task that was accomplished').setRequired(true))
         .addAttachmentOption(option => option.setName('image').setDescription('Optional image to upload').setRequired(false)),
-       async execute(interaction) {
+    async execute(interaction) {
         await ensureActivityLogTableExists();
         
         const tableName = interaction.options.getString('tablename');
@@ -172,5 +172,13 @@ module.exports = {
             console.error('Error updating category or logging activity:', error);
             await interaction.reply(`Failed to update ${matchedIngredient} or log activity in table ${tableName}.`);
         }
+    },
+    async autocomplete(interaction) {
+        const focusedValue = interaction.options.getFocused();
+        const choices = Object.keys(ingredients).map(ingredient => ingredient);
+        const filtered = choices.filter(choice => choice.toLowerCase().includes(focusedValue.toLowerCase()));
+        await interaction.respond(
+            filtered.slice(0, 25).map(choice => ({ name: choice, value: choice.toLowerCase().replace(/\s+/g, '_') }))
+        );
     },
 };

@@ -18,22 +18,16 @@ const ingredients = {
     'Learn': 5, 'Surprise': 5, 'What': 1, 'Who': 1, 'How': 1, 'Why': 1
 };
 
-client.on(Events.InteractionCreate, async (interaction) => {
-    console.log("interaction create events works")
-    if (!interaction.isAutocomplete()) return;
-
-    if (interaction.commandName === 'add' && interaction.options.getFocused(true).name === 'category') {
-        const focusedValue = interaction.options.getFocused();
-
-        const choices = Object.keys(ingredients);
-        const filtered = choices
-            .filter(choice => choice.toLowerCase().includes(focusedValue.toLowerCase()))
-            .slice(0, 25)  // Limit the results to 25 as required by Discord
-            .map(choice => ({ name: choice, value: choice.toLowerCase().replace(/\s+/g, '_') }));
-
-        await interaction.respond(filtered.map(choice => ({ name: choice.name, value: choice.value })));
+client.on('interactionCreate', async (interaction) => {
+    if (interaction.isAutocomplete() && interaction.commandName === 'add') {
+        // Assuming your command modules are structured similarly and imported correctly
+        const command = require('./path/to/add.js'); // Adjust the path as necessary
+        if (command.autocomplete) {
+            await command.autocomplete(interaction);
+        }
     }
 });
+
 
 // Initialize the S3 client
 const s3Client = new S3Client({
@@ -114,18 +108,18 @@ const ingredientsList = Object.keys(ingredients).map(ingredient => ingredient.to
 
 module.exports = {
     data: new SlashCommandBuilder()
-    .setName('add')
-    .setDescription('Adds a value to a category in a specified table, with a description of the activity.')
-    .addStringOption(option => option.setName('tablename').setDescription('The name of the table to update').setRequired(true))
-    .addStringOption(option =>
-        option.setName('category')
-        .setDescription('The category to increment:')
-        .setRequired(true)
-        .setAutocomplete(true))
-    .addIntegerOption(option => option.setName('value').setDescription('The value to add').setRequired(true))
-    .addStringOption(option => option.setName('activitynote').setDescription('Description of the task that was accomplished').setRequired(true))
-    .addAttachmentOption(option => option.setName('image').setDescription('Optional image to upload').setRequired(false)),
-    async execute(interaction) {
+        .setName('add')
+        .setDescription('Adds a value to a category in a specified table, with a description of the activity.')
+        .addStringOption(option => option.setName('tablename').setDescription('The name of the table to update').setRequired(true))
+        .addStringOption(option =>
+            option.setName('category')
+            .setDescription('The category to increment:')
+            .setRequired(true)
+            .setAutocomplete(true))
+        .addIntegerOption(option => option.setName('value').setDescription('The value to add').setRequired(true))
+        .addStringOption(option => option.setName('activitynote').setDescription('Description of the task that was accomplished').setRequired(true))
+        .addAttachmentOption(option => option.setName('image').setDescription('Optional image to upload').setRequired(false)),
+       async execute(interaction) {
         await ensureActivityLogTableExists();
         
         const tableName = interaction.options.getString('tablename');

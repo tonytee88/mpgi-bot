@@ -102,7 +102,11 @@ const ensureActivityLogTableExists = async () => {
     }
 };
 
-
+async function fetchTableNames(pgClient) {
+    // Adjust the query if you have a specific schema or naming convention
+    const result = await pgClient.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
+    return result.rows.map(row => row.table_name);
+}
 
 const ingredientsList = Object.keys(ingredients).map(ingredient => ingredient.toLowerCase());
 
@@ -110,21 +114,32 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('add')
         .setDescription('Adds a value to a category in a specified table, with a description of the activity.')
-        .addStringOption(option => option.setName('tablename').setDescription('The name of the table to update').setRequired(true))
+        .addStringOption(option => 
+            option.setName('tablename')
+            .setDescription('The name of the table to update')
+            .setRequired(true)
+            .setAutocomplete(true))
         .addStringOption(option =>
             option.setName('category')
-                .setDescription('The category to increment:')
-                .setRequired(true)
-                .setAutocomplete(true))
+            .setDescription('The category to increment:')
+            .setRequired(true)
+            .setAutocomplete(true))
         .addIntegerOption(option => option.setName('value').setDescription('The value to add').setRequired(true))
         .addStringOption(option => option.setName('activitynote').setDescription('Description of the task that was accomplished').setRequired(true))
         .addAttachmentOption(option => option.setName('image').setDescription('Optional image to upload').setRequired(false)),
     async autocomplete(interaction) {
-            const focusedValue = interaction.options.getFocused();
-            const choices = Object.keys(ingredients).map(ingredient => ingredient);
-            //const choices = ['Popular Topics: Threads', 'Sharding: Getting started', 'Library: Voice Connections', 'Interactions: Replying to slash commands', 'Popular Topics: Embed preview'];
+            const focusedOption = interaction.options.getFocused(true);
+            let choices;
+
+            if (focusedOption.name === 'tablename') {
+                const tableNames = await fetchTableNames(pgClient);
+                choices = tableNames;
+            }
+
+            if (focusedOption.name === 'category') {
+                choices = Object.keys(ingredients).map(ingredient => ingredient);
+            }
             const filtered = choices.filter(choice => choice.toLowerCase().includes(focusedValue.toLowerCase()));
-            //const filtered = choices.filter(choice => choice.startsWith(focusedValue));
             await interaction.respond(
                 filtered.slice(0, 25).map(choice => ({ name: choice, value: choice.toLowerCase().replace(/\s+/g, '_') }))
             );

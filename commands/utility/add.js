@@ -134,7 +134,11 @@ module.exports = {
             .setDescription('The category to increment:')
             .setRequired(true)
             .setAutocomplete(true))
-        .addIntegerOption(option => option.setName('value').setDescription('The value to add').setRequired(true))
+        .addIntegerOption(option => 
+            option.setName('value')
+            .setDescription('The value to add')
+            .setRequired(true)
+            .setAutocomplete(true))
         .addStringOption(option => 
             option.setName('activitynote')
             .setDescription('Description of the task that was accomplished')
@@ -145,7 +149,7 @@ module.exports = {
             const focusedOption = interaction.options.getFocused(true);
         
             if (focusedOption.name === 'tablename') {
-                console.log("table is focused");
+                //console.log("table is focused");
                 const tableNames = await fetchTableNames(pgClient);
                 await interaction.respond(
                     tableNames.map(tableName => ({ name: tableName, value: tableName }))
@@ -167,7 +171,13 @@ module.exports = {
                 await interaction.respond(
                     ideas.slice(0, 25).map(idea => ({ name: idea, value: idea }))
                 );
-            }
+            } else if (focusedOption.name === 'value') {
+                // Static values for the 'value' option
+                const values = ['1', '2', '5'];
+                await interaction.respond(
+                    values.map(value => ({ name: value, value }))
+                );
+                }
         },
         async execute(interaction) {
             await interaction.deferReply();

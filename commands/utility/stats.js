@@ -7,7 +7,7 @@ const pgClient = new Client({
         rejectUnauthorized: false,  // Necessary for Heroku
     },
 });
-//pgClient.connect();
+pgClient.connect();
 console.log("client connected (stats)");
 
 const ingredients = {
@@ -29,6 +29,21 @@ const ingredients = {
     'Why': 1
 };
 
+async function fetchTableNames(pgClient) {
+  const query = `
+      SELECT m.table_name
+      FROM table_metadata m
+      JOIN information_schema.columns c ON m.table_name = c.table_name
+      WHERE c.column_name = 'ingredient'
+      AND m.table_name != 'activity_logs'
+      AND m.created_at IS NOT NULL
+      ORDER BY m.created_at DESC;
+  `;
+
+  const result = await pgClient.query(query);
+  return result.rows.map(row => row.table_name);
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('stats')
@@ -36,7 +51,18 @@ module.exports = {
         .addStringOption(option =>
             option.setName('tablename')
             .setDescription('The name of the table to retrieve stats from')
-            .setRequired(true)),
+            .setRequired(true)
+            .setAutocomplete(true)),
+    async autocomplete(interaction) {
+      const focusedOption = interaction.options.getFocused(true);
+  
+      if (focusedOption.name === 'tablename') {
+          //console.log("table is focused");
+          const tableNames = await fetchTableNames(pgClient);
+          await interaction.respond(
+              tableNames.map(tableName => ({ name: tableName, value: tableName }))
+          );
+      }},
     async execute(interaction) {
         const tableName = interaction.options.getString('tablename');
         const selectQuery = `SELECT ingredient, score FROM "${tableName}";`;

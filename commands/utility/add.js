@@ -116,7 +116,6 @@ async function fetchTableNames(pgClient) {
 
 //GROUP BY m.table_name
 
-
 async function fetchIdeasByCategory(pgClient, category) {
     const query = `SELECT idea FROM ideas WHERE category = $1;`;
     const result = await pgClient.query(query, [category]);

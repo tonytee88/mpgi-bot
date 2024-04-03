@@ -154,6 +154,7 @@ module.exports = {
                 );
             } else if (focusedOption.name === 'activitynote') {
                 const category = interaction.options.getString('category');
+                console.log("Category:", category);
                 if (!category) {
                     await interaction.respond([]);
                     return;

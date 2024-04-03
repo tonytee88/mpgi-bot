@@ -101,11 +101,13 @@ const ensureActivityLogTableExists = async () => {
 
 async function fetchTableNames(pgClient) {
     const query = `
-        SELECT DISTINCT table_name 
-        FROM information_schema.columns 
-        WHERE table_schema = 'public'
-        AND column_name = 'ingredient'
-        AND table_name != 'activity_logs';
+        SELECT m.table_name
+        FROM table_metadata m
+        JOIN information_schema.columns c ON m.table_name = c.table_name
+        WHERE c.column_name = 'ingredient'
+        AND m.table_name != 'activity_logs'
+        GROUP BY m.table_name
+        ORDER BY m.created_at DESC;
     `;
 
     const result = await pgClient.query(query);

@@ -46,6 +46,18 @@ module.exports = {
         return;
     }
 
+    // Ensure the table_metadata exists
+    const createMetadataTableQuery = `
+      CREATE TABLE IF NOT EXISTS table_metadata (
+        id SERIAL PRIMARY KEY,
+        table_name VARCHAR(255) UNIQUE NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+
+    await pgClient.query(createMetadataTableQuery);
+
+    // Create the user-defined table
     let createTableQuery = `
       CREATE TABLE "${tableName}" (
         id SERIAL PRIMARY KEY,
@@ -57,7 +69,14 @@ module.exports = {
 
     try {
         await pgClient.query(createTableQuery);
-        
+
+        // Insert a record for the new table into table_metadata
+        const insertMetadataQuery = `
+          INSERT INTO table_metadata (table_name)
+          VALUES ($1);
+        `;
+        await pgClient.query(insertMetadataQuery, [tableName]);
+
         for (const [ingredient, goal] of Object.entries(ingredients)) {
             let insertQuery = `
               INSERT INTO "${tableName}" (ingredient, goal) 
@@ -65,7 +84,7 @@ module.exports = {
             `;
             await pgClient.query(insertQuery, [ingredient, goal]);
         }
-        
+
         await interaction.reply(`Table "${tableName}" created and populated successfully.`);
     } catch (error) {
         console.error('Error creating and populating table:', error);

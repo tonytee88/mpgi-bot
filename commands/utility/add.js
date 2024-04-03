@@ -161,6 +161,7 @@ module.exports = {
                     return;
                 }
                 const ideas = await fetchIdeasByCategory(pgClient, category);
+                console.log("Ideas:", ideas);
                 await interaction.respond(
                     ideas.slice(0, 25).map(idea => ({ name: idea, value: idea }))
                 );

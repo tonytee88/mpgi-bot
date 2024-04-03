@@ -107,7 +107,7 @@ async function fetchTableNames(pgClient) {
         WHERE c.column_name = 'ingredient'
         AND m.table_name != 'activity_logs'
         AND m.created_at IS NOT NULL
-
+        ORDER BY m.created_at DESC;
     `;
 
     const result = await pgClient.query(query);
@@ -115,7 +115,7 @@ async function fetchTableNames(pgClient) {
 }
 
 //GROUP BY m.table_name
-//ORDER BY m.created_at DESC;
+
 
 async function fetchIdeasByCategory(pgClient, category) {
     const query = `SELECT idea FROM ideas WHERE category = $1;`;

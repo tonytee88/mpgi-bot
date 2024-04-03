@@ -9,8 +9,6 @@ const { Client: discordClient, Collection, Events, GatewayIntentBits } = require
 
 const client = new discordClient({ intents: [GatewayIntentBits.Guilds] });
 
-//const token = process.env.DISCORD_BOT_TOKEN;
-
 const ingredients = {
     'Cooking': 50, 'Work': 20, 'Social': 10, 'Give Back': 5,
     'Husband Duty': 5, 'Fatherhood': 30, 'Body Health': 50,
@@ -137,7 +135,11 @@ module.exports = {
             .setRequired(true)
             .setAutocomplete(true))
         .addIntegerOption(option => option.setName('value').setDescription('The value to add').setRequired(true))
-        .addStringOption(option => option.setName('activitynote').setDescription('Description of the task that was accomplished').setRequired(true))
+        .addStringOption(option => 
+            option.setName('activitynote')
+            .setDescription('Description of the task that was accomplished')
+            .setRequired(true)
+            .setAutocomplete(true))
         .addAttachmentOption(option => option.setName('image').setDescription('Optional image to upload').setRequired(false)),
         async autocomplete(interaction) {
             const focusedOption = interaction.options.getFocused(true);

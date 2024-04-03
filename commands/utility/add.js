@@ -143,6 +143,7 @@ module.exports = {
             const focusedOption = interaction.options.getFocused(true);
         
             if (focusedOption.name === 'tablename') {
+                console.log("table is focused");
                 const tableNames = await fetchTableNames(pgClient);
                 await interaction.respond(
                     tableNames.map(tableName => ({ name: tableName, value: tableName }))

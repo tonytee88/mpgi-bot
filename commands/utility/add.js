@@ -114,6 +114,12 @@ async function fetchTableNames(pgClient) {
     return result.rows.map(row => row.table_name);
 }
 
+async function fetchIdeas(pgClient, category) {
+    const query = `SELECT idea FROM ideas WHERE category = $1;`;
+    const result = await pgClient.query(query, [category]);
+    return result.rows.map(row => row.idea);
+}
+
 const ingredientsList = Object.keys(ingredients).map(ingredient => ingredient.toLowerCase());
 
 module.exports = {
@@ -133,28 +139,48 @@ module.exports = {
         .addIntegerOption(option => option.setName('value').setDescription('The value to add').setRequired(true))
         .addStringOption(option => option.setName('activitynote').setDescription('Description of the task that was accomplished').setRequired(true))
         .addAttachmentOption(option => option.setName('image').setDescription('Optional image to upload').setRequired(false)),
-    async autocomplete(interaction) {
+        async autocomplete(interaction) {
             const focusedOption = interaction.options.getFocused(true);
-            let choices;
-
+        
             if (focusedOption.name === 'tablename') {
                 const tableNames = await fetchTableNames(pgClient);
-                choices = tableNames.map(tableName => ({ name: tableName, value: tableName }));
+                await interaction.respond(
+                    tableNames.map(tableName => ({ name: tableName, value: tableName }))
+                );
             } else if (focusedOption.name === 'category') {
-                choices = Object.keys(ingredients).map(ingredient => ({ name: ingredient, value: ingredient }));
-            }
+                const choices = Object.keys(ingredients).map(ingredient => ({ name: ingredient, value: ingredient }));
+                await interaction.respond(
+                    choices.filter(choice => choice.name.toLowerCase().includes(focusedOption.value.toLowerCase()))
+                );
+            } else if (focusedOption.name === 'activitynote') {
+                // Fetch the category to provide relevant ideas.
+                const categoryOption = interaction.options.getString('category');
+                if (!categoryOption) {
+                    await interaction.respond([]);  // Send an empty response if no category is selected.
+                    return;
+                }
         
-            const focusedValue = focusedOption.value;
-            const filtered = choices.filter(choice => choice.name.toLowerCase().includes(focusedValue.toLowerCase()));
-            await interaction.respond(
-                filtered.slice(0, 25).map(choice => ({ name: choice.name, value: choice.value.toLowerCase().replace(/\s+/g, '_') }))
-            );
+                // Convert category value back to its original form to match database entries.
+                const category = Object.keys(ingredients).find(key => key.toLowerCase().replace(/\s+/g, '_') === categoryOption);
+        
+                if (category) {
+                    const ideas = await fetchIdeasByCategory(pgClient, category);
+                    const focusedValue = focusedOption.value;
+                    const filtered = ideas.filter(idea => idea.toLowerCase().includes(focusedValue.toLowerCase()));
+        
+                    await interaction.respond(
+                        filtered.slice(0, 25).map(idea => ({ name: idea, value: idea }))
+                    );
+                } else {
+                    await interaction.respond([]);
+                }
+            }
         },       
         async execute(interaction) {
             await interaction.deferReply();  // Acknowledge the interaction immediately.
-            
+        
             await ensureActivityLogTableExists();
-            
+        
             const tableName = interaction.options.getString('tablename');
             const userCategory = interaction.options.getString('category');
             const value = interaction.options.getInteger('value');
@@ -192,6 +218,10 @@ module.exports = {
                                           VALUES ($1, $2, $3, $4, $5);`;
                 await pgClient.query(logActivityQuery, [tableName, matchedIngredient, activityNote, currentDate, imageUrl]);
         
+                // Delete the idea from the ideas table if it was one of the autocomplete suggestions.
+                const deleteIdeaQuery = `DELETE FROM ideas WHERE category = $1 AND idea = $2;`;
+                await pgClient.query(deleteIdeaQuery, [userCategory, activityNote]);
+        
                 await pgClient.query('COMMIT');
         
                 let responseMessage = `Added ${value} to ${matchedIngredient} with note: '${activityNote}' on ${currentDate} in table ${tableName}.`;
@@ -206,5 +236,6 @@ module.exports = {
                 await interaction.editReply(`Failed to update ${matchedIngredient} or log activity in table ${tableName}.`);
             }
         },
+   
         
 };

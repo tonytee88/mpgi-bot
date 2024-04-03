@@ -114,7 +114,7 @@ async function fetchTableNames(pgClient) {
     return result.rows.map(row => row.table_name);
 }
 
-async function fetchIdeas(pgClient, category) {
+async function fetchIdeasByCategory(pgClient, category) {
     const query = `SELECT idea FROM ideas WHERE category = $1;`;
     const result = await pgClient.query(query, [category]);
     return result.rows.map(row => row.idea);
@@ -153,89 +153,58 @@ module.exports = {
                     choices.filter(choice => choice.name.toLowerCase().includes(focusedOption.value.toLowerCase()))
                 );
             } else if (focusedOption.name === 'activitynote') {
-                // Fetch the category to provide relevant ideas.
-                const categoryOption = interaction.options.getString('category');
-                if (!categoryOption) {
-                    await interaction.respond([]);  // Send an empty response if no category is selected.
+                const category = interaction.options.getString('category');
+                if (!category) {
+                    await interaction.respond([]);
                     return;
                 }
-        
-                // Convert category value back to its original form to match database entries.
-                const category = Object.keys(ingredients).find(key => key.toLowerCase().replace(/\s+/g, '_') === categoryOption);
-        
-                if (category) {
-                    const ideas = await fetchIdeasByCategory(pgClient, category);
-                    const focusedValue = focusedOption.value;
-                    const filtered = ideas.filter(idea => idea.toLowerCase().includes(focusedValue.toLowerCase()));
-        
-                    await interaction.respond(
-                        filtered.slice(0, 25).map(idea => ({ name: idea, value: idea }))
-                    );
-                } else {
-                    await interaction.respond([]);
-                }
+                const ideas = await fetchIdeasByCategory(pgClient, category);
+                await interaction.respond(
+                    ideas.slice(0, 25).map(idea => ({ name: idea, value: idea }))
+                );
             }
-        },       
+        },
         async execute(interaction) {
-            await interaction.deferReply();  // Acknowledge the interaction immediately.
-        
+            await interaction.deferReply();
             await ensureActivityLogTableExists();
-        
+    
             const tableName = interaction.options.getString('tablename');
             const userCategory = interaction.options.getString('category');
             const value = interaction.options.getInteger('value');
             const activityNote = interaction.options.getString('activitynote');
             const imageAttachment = interaction.options.getAttachment('image');
-            const currentDate = new Date().toISOString().split('T')[0];  // Format as YYYY-MM-DD
-        
-            const normalizedInput = userCategory.toLowerCase();
-            const matches = stringSimilarity.findBestMatch(normalizedInput, ingredientsList);
-        
-            if (matches.bestMatch.rating < 0.8) {
-                await interaction.editReply("Please enter a valid category.");
-                return;
-            }
-        
-            const matchedIngredient = matches.bestMatch.target;
+            const currentDate = new Date().toISOString().split('T')[0];
+    
             let imageUrl = null;
-        
             if (imageAttachment) {
-                try {
-                    const { key, Bucket } = await uploadImageToS3(imageAttachment.url, process.env.AWS_S3_BUCKET_NAME);
-                    imageUrl = await generatePreSignedUrl(Bucket, key);
-                } catch (error) {
-                    console.error('Error uploading image to S3:', error);
-                }
+                const { key, Bucket } = await uploadImageToS3(imageAttachment.url, process.env.AWS_S3_BUCKET_NAME);
+                imageUrl = await generatePreSignedUrl(Bucket, key);
             }
-        
+    
             try {
                 await pgClient.query('BEGIN');
-        
                 const updateScoreQuery = `UPDATE "${tableName}" SET score = score + $1 WHERE LOWER(ingredient) = $2;`;
-                await pgClient.query(updateScoreQuery, [value, matchedIngredient.toLowerCase()]);
-        
+                await pgClient.query(updateScoreQuery, [value, userCategory]);
+    
                 const logActivityQuery = `INSERT INTO activity_logs (table_name, ingredient, activity_note, activity_date, image_url)
                                           VALUES ($1, $2, $3, $4, $5);`;
-                await pgClient.query(logActivityQuery, [tableName, matchedIngredient, activityNote, currentDate, imageUrl]);
-        
-                // Delete the idea from the ideas table if it was one of the autocomplete suggestions.
+                await pgClient.query(logActivityQuery, [tableName, userCategory, activityNote, currentDate, imageUrl]);
+    
+                // Delete the idea from the ideas table if it was selected from the suggestions.
                 const deleteIdeaQuery = `DELETE FROM ideas WHERE category = $1 AND idea = $2;`;
                 await pgClient.query(deleteIdeaQuery, [userCategory, activityNote]);
-        
+    
                 await pgClient.query('COMMIT');
-        
-                let responseMessage = `Added ${value} to ${matchedIngredient} with note: '${activityNote}' on ${currentDate} in table ${tableName}.`;
+    
+                let responseMessage = `Added ${value} to ${userCategory} with note: '${activityNote}' on ${currentDate} in table ${tableName}.`;
                 if (imageUrl) {
                     responseMessage += `\nImage URL (accessible for 1 hour): ${imageUrl}`;
                 }
-        
-                await interaction.editReply(responseMessage);  // Update the reply with the final message.
+                await interaction.editReply(responseMessage);
             } catch (error) {
                 await pgClient.query('ROLLBACK');
-                console.error('Error updating category or logging activity:', error);
-                await interaction.editReply(`Failed to update ${matchedIngredient} or log activity in table ${tableName}.`);
+                console.error('Error in transaction:', error);
+                await interaction.editReply(`Failed to process your request.`);
             }
         },
-   
-        
-};
+    };

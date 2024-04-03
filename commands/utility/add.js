@@ -106,6 +106,7 @@ async function fetchTableNames(pgClient) {
         JOIN information_schema.columns c ON m.table_name = c.table_name
         WHERE c.column_name = 'ingredient'
         AND m.table_name != 'activity_logs'
+        AND m.created_at IS NOT NULL
         GROUP BY m.table_name
         ORDER BY m.created_at DESC;
     `;

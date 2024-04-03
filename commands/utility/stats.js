@@ -45,19 +45,29 @@ async function fetchTableNames(pgClient) {
 }
 
 module.exports = {
-  data: new SlashCommandBuilder()
-      .setName('stats')
-      .setDescription('Displays current stats for a specified table.')
-      .addStringOption(option =>
-          option.setName('tablename')
-          .setDescription('The name of the table to retrieve stats from')
-          .setRequired(true)
-          .setAutocomplete(true)),
-  async execute(interaction) {
-      const tableName = interaction.options.getString('tablename');
-      const selectQuery = `SELECT ingredient, score FROM "${tableName}";`;
+    data: new SlashCommandBuilder()
+        .setName('stats')
+        .setDescription('Displays current stats for a specified table.')
+        .addStringOption(option =>
+            option.setName('tablename')
+            .setDescription('The name of the table to retrieve stats from')
+            .setRequired(true)
+            .setAutocomplete(true)),
+    async autocomplete(interaction) {
+      const focusedOption = interaction.options.getFocused(true);
+  
+      if (focusedOption.name === 'tablename') {
+          //console.log("table is focused");
+          const tableNames = await fetchTableNames(pgClient);
+          await interaction.respond(
+              tableNames.map(tableName => ({ name: tableName, value: tableName }))
+          );
+      }},
+    async execute(interaction) {
+        const tableName = interaction.options.getString('tablename');
+        const selectQuery = `SELECT ingredient, score FROM "${tableName}";`;
 
-      try {
+        try {
           const res = await pgClient.query(selectQuery);
           let dbResults = {};
           res.rows.forEach(row => {

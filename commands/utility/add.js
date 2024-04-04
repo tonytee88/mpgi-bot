@@ -50,7 +50,6 @@ async function uploadImageToS3(imageUrl, bucketName) {
                 Key: imageKey,
                 Body: imageBuffer,
                 ContentType: 'image/png',
-                ACL: 'public-read',  // Make the image publicly readable
             },
         });
 

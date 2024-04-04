@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPGI Activity Wall</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .with-images div, .without-images div {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #e9e9e9;
+            border-radius: 4px;
+        }
+
+        .with-images img {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        .with-images p, .without-images p {
+            margin: 10px 0 0;
+            padding: 0;
+            color: #333;
+        }
+
+        @media (min-width: 600px) {
+            .with-images, .without-images {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+
+            .with-images div, .without-images div {
+                flex: 0 48%;
+            }
+        }
+
+        @media (min-width: 900px) {
+            .with-images div, .without-images div {
+                flex: 0 31%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MPGI Activity Wall</h1>
+        <div class="with-images">
+            <!-- Images with activities will be inserted here -->
+        </div>
+        <div class="without-images">
+            <!-- Activities without images will be inserted here -->
+        </div>
+    </div>
+</body>
+</html>

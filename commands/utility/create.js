@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { Client } = require('pg');
+const pgClient = require('./db');
 
 const ingredients = {
   'Cooking': 50,
@@ -20,14 +21,14 @@ const ingredients = {
   'Why': 1
 };
 
-const pgClient = new Client({
-  connectionString: process.env.POSTGRES_CONNECTION_STRING,
-  ssl: {
-      rejectUnauthorized: false,
-  },
-});
-pgClient.connect();
-console.log("client connected (create)");
+// const pgClient = new Client({
+//   connectionString: process.env.POSTGRES_CONNECTION_STRING,
+//   ssl: {
+//       rejectUnauthorized: false,
+//   },
+// });
+//pgClient.connect();
+
 
 module.exports = {
   data: new SlashCommandBuilder()

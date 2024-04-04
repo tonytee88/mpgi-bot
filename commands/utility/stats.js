@@ -1,14 +1,15 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { Client } = require('pg');
+const pgClient = require('./db');
 
-const pgClient = new Client({
-    connectionString: process.env.POSTGRES_CONNECTION_STRING,
-    ssl: {
-        rejectUnauthorized: false,  // Necessary for Heroku
-    },
-});
-pgClient.connect();
-console.log("client connected (stats)");
+// const pgClient = new Client({
+//     connectionString: process.env.POSTGRES_CONNECTION_STRING,
+//     ssl: {
+//         rejectUnauthorized: false,  // Necessary for Heroku
+//     },
+// });
+// pgClient.connect();
+// console.log("client connected (stats)");
 
 const ingredients = {
     'Cooking': 50,

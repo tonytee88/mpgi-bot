@@ -6,6 +6,7 @@ const { Upload } = require('@aws-sdk/lib-storage');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const fetch = require('node-fetch');
 const { Client: discordClient, Collection, Events, GatewayIntentBits } = require('discord.js');
+const pgClient = require('./db');
 
 const client = new discordClient({ intents: [GatewayIntentBits.Guilds] });
 
@@ -71,15 +72,15 @@ async function generatePreSignedUrl(bucketName, imageKey) {
     return await getSignedUrl(s3Client, command, { expiresIn: 3600 });
 }
 
-const pgClient = new Client({
-  connectionString: process.env.POSTGRES_CONNECTION_STRING,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+// const pgClient = new Client({
+//   connectionString: process.env.POSTGRES_CONNECTION_STRING,
+//   ssl: {
+//     rejectUnauthorized: false,
+//   },
+// });
 
-// Ensure the connection is established before any query execution
-pgClient.connect().then(() => console.log("client connected (add)"))
+// // Ensure the connection is established before any query execution
+// pgClient.connect().then(() => console.log("client connected (add)"))
 
 const ensureActivityLogTableExists = async () => {
     const createTableQuery = `

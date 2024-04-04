@@ -5,12 +5,6 @@ const pgClient = new Client({
   ssl: { rejectUnauthorized: false },
 });
 
-pgClient.connect((err) => {
-  if (err) {
-    console.error('Connection error', err.stack);
-  } else {
-    console.log('Connected to PostgreSQL');
-  }
-});
+pgClient.connect();
 
 module.exports = pgClient;

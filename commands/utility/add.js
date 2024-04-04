@@ -202,7 +202,7 @@ module.exports = {
     
             try {
                 await pgClient.query('BEGIN');
-                const updateScoreQuery = `UPDATE "${tableName}" SET score = score + $1 WHERE LOWER(ingredient) = $2;`;
+                const updateScoreQuery = `UPDATE "${tableName}" SET score = score + $1 WHERE ingredient = $2;`;
                 await pgClient.query(updateScoreQuery, [value, userCategory]);
     
                 const logActivityQuery = `INSERT INTO activity_logs (table_name, ingredient, activity_note, activity_date, image_url)

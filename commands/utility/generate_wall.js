@@ -2,6 +2,21 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { Client } = require('pg');
 const pgClient = require('./db');
 
+async function fetchTableNames(pgClient) {
+    const query = `
+        SELECT m.table_name
+        FROM table_metadata m
+        JOIN information_schema.columns c ON m.table_name = c.table_name
+        WHERE c.column_name = 'ingredient'
+        AND m.table_name != 'activity_logs'
+        AND m.created_at IS NOT NULL
+        ORDER BY m.created_at DESC;
+    `;
+
+    const result = await pgClient.query(query);
+    return result.rows.map(row => row.table_name);
+}
+
 
 module.exports = {
     data: new SlashCommandBuilder()

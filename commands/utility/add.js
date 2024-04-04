@@ -63,25 +63,6 @@ async function uploadImageToS3(imageUrl, bucketName) {
     }
 }
 
-async function generatePreSignedUrl(bucketName, imageKey) {
-    const command = new GetObjectCommand({
-        Bucket: bucketName,
-        Key: imageKey,
-    });
-
-    return await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-}
-
-// const pgClient = new Client({
-//   connectionString: process.env.POSTGRES_CONNECTION_STRING,
-//   ssl: {
-//     rejectUnauthorized: false,
-//   },
-// });
-
-// // Ensure the connection is established before any query execution
-// pgClient.connect().then(() => console.log("client connected (add)"))
-
 const ensureActivityLogTableExists = async () => {
     const createTableQuery = `
         CREATE TABLE IF NOT EXISTS activity_logs (

@@ -50,14 +50,14 @@ async function uploadImageToS3(imageUrl, bucketName) {
                 Key: imageKey,
                 Body: imageBuffer,
                 ContentType: 'image/png',
-                ACL: 'public-read',  // Make sure the uploaded file is publicly readable
+                ACL: 'public-read',  // Make the image publicly readable
             },
         });
 
-        await parallelUploads3.done();
-
-        // Return the public URL of the uploaded image
-        return `https://${bucketName}.s3.${s3Client.config.region}.amazonaws.com/${imageKey}`;
+        const uploadResult = await parallelUploads3.done();
+        // Construct the public URL based on the bucket and key
+        const imageUrl = `https://${bucketName}.s3.amazonaws.com/${imageKey}`;
+        return imageUrl;
     } catch (err) {
         throw new Error(`Failed to upload image: ${err.message}`);
     }
@@ -219,7 +219,7 @@ module.exports = {
     
                 let responseMessage = `Added ${value} to ${userCategory} with note: '${activityNote}' on ${currentDate} in table ${tableName}.`;
                 if (imageUrl) {
-                    responseMessage += `\nImage URL (accessible for 1 hour): ${imageUrl}`;
+                    responseMessage += `\nImage URL: ${imageUrl}`;
                 }
                 await interaction.editReply(responseMessage);
             } catch (error) {

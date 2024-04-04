@@ -50,11 +50,14 @@ async function uploadImageToS3(imageUrl, bucketName) {
                 Key: imageKey,
                 Body: imageBuffer,
                 ContentType: 'image/png',
+                ACL: 'public-read',  // Make sure the uploaded file is publicly readable
             },
         });
 
-        const uploadResult = await parallelUploads3.done();
-        return { key: imageKey, Bucket: bucketName };
+        await parallelUploads3.done();
+
+        // Return the public URL of the uploaded image
+        return `https://${bucketName}.s3.${s3Client.config.region}.amazonaws.com/${imageKey}`;
     } catch (err) {
         throw new Error(`Failed to upload image: ${err.message}`);
     }
@@ -196,8 +199,7 @@ module.exports = {
     
             let imageUrl = null;
             if (imageAttachment) {
-                const { key, Bucket } = await uploadImageToS3(imageAttachment.url, process.env.AWS_S3_BUCKET_NAME);
-                imageUrl = await generatePreSignedUrl(Bucket, key);
+                imageUrl = await uploadImageToS3(imageAttachment.url, process.env.AWS_S3_BUCKET_NAME);
             }
     
             try {

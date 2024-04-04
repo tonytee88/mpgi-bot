@@ -177,7 +177,7 @@ module.exports = {
                 );
             } else if (focusedOption.name === 'value') {
                 // Static values for the 'value' option
-                const values = ['1', '2', '5'];
+                const values = [1, 2, 5];
                 await interaction.respond(
                     values.map(value => ({ name: value, value }))
                 );

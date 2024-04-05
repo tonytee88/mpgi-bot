@@ -31,7 +31,7 @@ async function setMode(userId, tableName, defaultValue) {
 }
 
 client.on(Events.InteractionCreate, async interaction => {
-    if (!interaction.isSelectMenu()) return;
+    if (!interaction.isStringSelectMenu()) return;
 
     if (interaction.customId === 'select_table') {
         const tableName = interaction.values[0];
@@ -39,7 +39,7 @@ client.on(Events.InteractionCreate, async interaction => {
         // Create a string select menu for default values in Discord.js v14
         const valueSelectMenu = new ActionRowBuilder()
             .addComponents(
-                new SelectMenuBuilder()
+                new StringSelectMenuBuilder()
                     .setCustomId('select_value')
                     .setPlaceholder('Select a default value')
                     .addOptions([

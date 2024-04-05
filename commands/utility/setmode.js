@@ -28,35 +28,44 @@ async function setMode(userId, tableName, defaultValue) {
     `;
 
     await pgClient.query(query, [userId, tableName, defaultValue]);
+    console.log(`Saving mode for user ${userId}: Table - ${tableName}, Default Value - ${defaultValue}`);
+
 }
 
 client.on(Events.InteractionCreate, async interaction => {
-    if (!interaction.isStringSelectMenu()) return;
+    try {
+        if (!interaction.isSelectMenu()) return;
 
-    if (interaction.customId === 'select_table') {
-        const tableName = interaction.values[0];
+        if (interaction.customId === 'select_table') {
+            const tableName = interaction.values[0];
 
-        // Create a string select menu for default values in Discord.js v14
-        const valueSelectMenu = new ActionRowBuilder()
-            .addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId('select_value')
-                    .setPlaceholder('Select a default value')
-                    .addOptions([
-                        { label: '1', value: '1' },
-                        { label: '2', value: '2' },
-                        { label: '5', value: '5' },
-                    ]),
-            );
+            const valueSelectMenu = new ActionRowBuilder()
+                .addComponents(
+                    new SelectMenuBuilder()
+                        .setCustomId('select_value')
+                        .setPlaceholder('Select a default value')
+                        .addOptions([
+                            { label: '1', value: '1' },
+                            { label: '2', value: '2' },
+                            { label: '5', value: '5' },
+                        ]),
+                );
 
-        await interaction.update({ content: `Selected table: ${tableName}. Now, select a default value:`, components: [valueSelectMenu] });
-    } else if (interaction.customId === 'select_value') {
-        const defaultValue = interaction.values[0];
+            await interaction.update({ content: `Selected table: ${tableName}. Now, select a default value:`, components: [valueSelectMenu] });
+        } else if (interaction.customId === 'select_value') {
+            const defaultValue = interaction.values[0];
 
-        // Implement setMode to save the user's preferences in your database
-        await setMode(interaction.user.id, tableName, defaultValue);
+            await setMode(interaction.user.id, tableName, defaultValue);
 
-        await interaction.update({ content: `Mode set: Adding activities to ${tableName} with default value ${defaultValue}.`, components: [] });
+            await interaction.update({ content: `Mode set: Adding activities to ${tableName} with default value ${defaultValue}.`, components: [] });
+        }
+    } catch (error) {
+        console.error('Error processing the interaction:', error);
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content: 'There was an error processing your request.', ephemeral: true }).catch(console.error);
+        } else {
+            await interaction.editReply({ content: 'There was an error processing your request.' }).catch(console.error);
+        }
     }
 });
 
@@ -77,7 +86,7 @@ module.exports = {
                     // Map each table name to an option
                     .addOptions(tableNames.map(name => ({
                         label: name,
-                        description: `Set mode to add activities to ${name}`,
+                        description: `Set mode to add activities/ideas to ${name}`,
                         value: name,
                     })))
             );

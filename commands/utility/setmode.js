@@ -34,7 +34,7 @@ async function setMode(userId, tableName, defaultValue) {
 
 client.on(Events.InteractionCreate, async interaction => {
     try {
-        if (!interaction.isSelectMenu()) return;
+        if (!interaction.isStringSelectMenu()) return;
 
         // Acknowledge the interaction immediately and defer the actual response
         await interaction.deferUpdate();
@@ -44,7 +44,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
             const valueSelectMenu = new ActionRowBuilder()
                 .addComponents(
-                    new SelectMenuBuilder()
+                    new StringSelectMenuBuilder()
                         .setCustomId('select_value')
                         .setPlaceholder('Select a default value')
                         .addOptions([
@@ -79,7 +79,7 @@ module.exports = {
     async execute(interaction) {
         // Assume fetchTableNames() is a function that returns an array of table names
         const tableNames = await fetchTableNames(pgClient);
-
+        console.log("table names load ok");
         // Create a string select menu for table names
         const tableSelectMenu = new ActionRowBuilder()
             .addComponents(
@@ -93,7 +93,7 @@ module.exports = {
                         value: name,
                     })))
             );
-
+        console.log("table menu selection OK");
         await interaction.reply({ content: 'Please select a table:', components: [tableSelectMenu] });
     },
 };

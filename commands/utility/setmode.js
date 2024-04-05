@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
+const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, SelectMenuBuilder, Events } = require('discord.js');
 const { Client } = require('pg');
 const pgClient = require('./db');
 const { Client: discordClient, GatewayIntentBits } = require('discord.js');
@@ -30,45 +30,35 @@ async function setMode(userId, tableName, defaultValue) {
     await pgClient.query(query, [userId, tableName, defaultValue]);
 }
 
-client.on('interactionCreate', async interaction => {
+client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isSelectMenu()) return;
 
     if (interaction.customId === 'select_table') {
         const tableName = interaction.values[0];
 
-        // Create a string select menu for default values
+        // Create a string select menu for default values in Discord.js v14
         const valueSelectMenu = new ActionRowBuilder()
             .addComponents(
-                new StringSelectMenuBuilder()
+                new SelectMenuBuilder()
                     .setCustomId('select_value')
                     .setPlaceholder('Select a default value')
                     .addOptions([
                         { label: '1', value: '1' },
                         { label: '2', value: '2' },
                         { label: '5', value: '5' },
-                    ])
+                    ]),
             );
 
         await interaction.update({ content: `Selected table: ${tableName}. Now, select a default value:`, components: [valueSelectMenu] });
-    }
-    else if (interaction.customId === 'select_value') {
+    } else if (interaction.customId === 'select_value') {
         const defaultValue = interaction.values[0];
 
-        // Here, setMode function should handle saving the user's mode preferences to the database
-        // This needs to be implemented to save tableName and defaultValue associated with the user's ID
+        // Implement setMode to save the user's preferences in your database
         await setMode(interaction.user.id, tableName, defaultValue);
 
         await interaction.update({ content: `Mode set: Adding activities to ${tableName} with default value ${defaultValue}.`, components: [] });
     }
 });
-
-// Implementation of setMode function should update the user's preferences in the database
-async function setMode(userId, tableName, defaultValue) {
-    // Save the mode settings to the database
-    // Replace this comment with your database logic
-    console.log(`Saving mode for user ${userId}: Table - ${tableName}, Default Value - ${defaultValue}`);
-}
-
 
 module.exports = {
     data: new SlashCommandBuilder()

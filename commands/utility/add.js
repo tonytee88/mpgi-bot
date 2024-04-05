@@ -10,6 +10,17 @@ const pgClient = require('./db');
 
 const client = new discordClient({ intents: [GatewayIntentBits.Guilds] });
 
+async function fetchUserMode(userId) {
+    const query = `
+        SELECT table_name, default_value
+        FROM user_modes
+        WHERE user_id = $1;
+    `;
+
+    const result = await pgClient.query(query, [userId]);
+    return result.rows[0];  // Assuming there's only one mode per user
+}
+
 const ingredients = {
     'Cooking': 50, 'Work': 20, 'Social': 10, 'Give Back': 5,
     'Husband Duty': 5, 'Fatherhood': 30, 'Body Health': 50,
@@ -111,20 +122,10 @@ const ingredientsList = Object.keys(ingredients).map(ingredient => ingredient.to
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('add')
-        .setDescription('Adds a value to a category in a specified table, with a description of the activity.')
-        .addStringOption(option => 
-            option.setName('tablename')
-            .setDescription('The name of the table to update')
-            .setRequired(true)
-            .setAutocomplete(true))
+        .setDescription('Adds a value to a category based on the set mode, with a description of the activity.')
         .addStringOption(option =>
             option.setName('category')
             .setDescription('The category to increment:')
-            .setRequired(true)
-            .setAutocomplete(true))
-        .addIntegerOption(option => 
-            option.setName('value')
-            .setDescription('The value to add')
             .setRequired(true)
             .setAutocomplete(true))
         .addStringOption(option => 
@@ -171,13 +172,19 @@ module.exports = {
             await interaction.deferReply();
             await ensureActivityLogTableExists();
     
-            const tableName = interaction.options.getString('tablename');
+            const userMode = await fetchUserMode(interaction.user.id);
+            if (!userMode) {
+                await interaction.editReply('No mode set. Please set a mode first using /setmode.');
+                return;
+            }
+
+            const tableName = userMode.table_name;
+            const value = parseInt(userMode.default_value);
             const userCategory = interaction.options.getString('category');
-            const value = interaction.options.getInteger('value');
             const activityNote = interaction.options.getString('activitynote');
             const imageAttachment = interaction.options.getAttachment('image');
             const currentDate = new Date().toISOString().split('T')[0];
-    
+
             let imageUrl = null;
             if (imageAttachment) {
                 imageUrl = await uploadImageToS3(imageAttachment.url, process.env.AWS_S3_BUCKET_NAME);

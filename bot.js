@@ -16,6 +16,7 @@ app.listen(PORT, () => {
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+const pgClient = require('./db');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 const token = process.env.DISCORD_BOT_TOKEN;
@@ -122,6 +123,59 @@ client.on('messageCreate', async (message) => {
   client.on("messageCreate", function(message){
     console.log(`a message was created`);
     console.log({message});
+});
+
+async function setMode(userId, tableName, defaultValue) {
+    const query = `
+        INSERT INTO user_modes (user_id, table_name, default_value)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (user_id) 
+        DO UPDATE SET table_name = EXCLUDED.table_name, default_value = EXCLUDED.default_value;
+    `;
+
+    await pgClient.query(query, [userId, tableName, defaultValue]);
+    console.log(`Saving mode for user ${userId}: Table - ${tableName}, Default Value - ${defaultValue}`);
+
+}
+
+client.on(Events.InteractionCreate, async interaction => {
+    try {
+        if (!interaction.isStringSelectMenu()) return;
+
+        // Acknowledge the interaction immediately and defer the actual response
+        await interaction.deferUpdate();
+
+        if (interaction.customId === 'select_table') {
+            const tableName = interaction.values[0];
+
+            const valueSelectMenu = new ActionRowBuilder()
+                .addComponents(
+                    new StringSelectMenuBuilder()
+                        .setCustomId('select_value')
+                        .setPlaceholder('Select a default value')
+                        .addOptions([
+                            { label: '1', value: '1' },
+                            { label: '2', value: '2' },
+                            { label: '5', value: '5' },
+                        ]),
+                );
+
+            // The update is deferred, so now we can edit the original message
+            await interaction.editReply({ content: `Selected table: ${tableName}. Now, select a default value:`, components: [valueSelectMenu] });
+        } else if (interaction.customId === 'select_value') {
+            const defaultValue = interaction.values[0];
+
+            // Assume setMode is an async function that handles the mode setting
+            await setMode(interaction.user.id, tableName, defaultValue);
+
+            // Since we've already deferred, we edit the reply instead of updating directly
+            await interaction.editReply({ content: `Mode set: Adding activities to ${tableName} with default value ${defaultValue}.`, components: [] });
+        }
+    } catch (error) {
+        console.error('Error processing the interaction:', error);
+        // Use editReply as interaction is already deferred
+        await interaction.editReply({ content: 'There was an error processing your request.' }).catch(console.error);
+    }
 });
 
 client.login(token);

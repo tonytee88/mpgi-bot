@@ -54,12 +54,21 @@ client.on('interactionCreate', async interaction => {
     else if (interaction.customId === 'select_value') {
         const defaultValue = interaction.values[0];
 
-        // Invoke setMode to save the mode settings to the database
+        // Here, setMode function should handle saving the user's mode preferences to the database
+        // This needs to be implemented to save tableName and defaultValue associated with the user's ID
         await setMode(interaction.user.id, tableName, defaultValue);
 
         await interaction.update({ content: `Mode set: Adding activities to ${tableName} with default value ${defaultValue}.`, components: [] });
     }
 });
+
+// Implementation of setMode function should update the user's preferences in the database
+async function setMode(userId, tableName, defaultValue) {
+    // Save the mode settings to the database
+    // Replace this comment with your database logic
+    console.log(`Saving mode for user ${userId}: Table - ${tableName}, Default Value - ${defaultValue}`);
+}
+
 
 module.exports = {
     data: new SlashCommandBuilder()

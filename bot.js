@@ -138,6 +138,19 @@ async function setMode(userId, tableName, defaultValue) {
 
 }
 
+async function setMode(userId, tableName, defaultValue) {
+    const query = `
+        INSERT INTO user_modes (user_id, table_name, default_value)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (user_id) 
+        DO UPDATE SET table_name = EXCLUDED.table_name, default_value = EXCLUDED.default_value;
+    `;
+
+    await pgClient.query(query, [userId, tableName, defaultValue]);
+    console.log(`Saving mode for user ${userId}: Table - ${tableName}, Default Value - ${defaultValue}`);
+
+}
+
 client.on(Events.InteractionCreate, async interaction => {
     try {
         if (!interaction.isStringSelectMenu()) return;

@@ -158,13 +158,16 @@ client.on(Events.InteractionCreate, async interaction => {
         // Acknowledge the interaction immediately and defer the actual response
         await interaction.deferUpdate();
 
-        if (interaction.customId === 'select_table') {
+        const parts = interaction.customId.split(':');
+        const action = parts[0];
+
+        if (action === 'select_table') {
             const tableName = interaction.values[0];
 
             const valueSelectMenu = new ActionRowBuilder()
                 .addComponents(
                     new StringSelectMenuBuilder()
-                        .setCustomId('select_value')
+                        .setCustomId(`select_value:${tableName}`)
                         .setPlaceholder('Select a default value')
                         .addOptions([
                             { label: '1', value: '1' },
@@ -173,20 +176,17 @@ client.on(Events.InteractionCreate, async interaction => {
                         ]),
                 );
 
-            // The update is deferred, so now we can edit the original message
             await interaction.editReply({ content: `Selected table: ${tableName}. Now, select a default value:`, components: [valueSelectMenu] });
-        } else if (interaction.customId === 'select_value') {
+        } else if (action === 'select_value') {
+            const tableName = parts[1];  // Retrieve the tableName from the customId
             const defaultValue = interaction.values[0];
 
-            // Assume setMode is an async function that handles the mode setting
             await setMode(interaction.user.id, tableName, defaultValue);
 
-            // Since we've already deferred, we edit the reply instead of updating directly
             await interaction.editReply({ content: `Mode set: Adding activities to ${tableName} with default value ${defaultValue}.`, components: [] });
         }
     } catch (error) {
         console.error('Error processing the interaction:', error);
-        // Use editReply as interaction is already deferred
         await interaction.editReply({ content: 'There was an error processing your request.' }).catch(console.error);
     }
 });

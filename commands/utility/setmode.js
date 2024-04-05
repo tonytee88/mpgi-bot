@@ -1,8 +1,8 @@
 const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, SelectMenuBuilder, Events } = require('discord.js');
 const { Client } = require('pg');
-const pgClient = require('./db');
 const { Client: discordClient, GatewayIntentBits } = require('discord.js');
 const client = new discordClient({ intents: [GatewayIntentBits.Guilds] });
+const pgClient = require('./db');
 
 async function fetchTableNames(pgClient) {
     const query = `
@@ -66,7 +66,7 @@ module.exports = {
         .setDescription('Sets the mode for adding activities.'),
     async execute(interaction) {
         // Assume fetchTableNames() is a function that returns an array of table names
-        const tableNames = await fetchTableNames();
+        const tableNames = await fetchTableNames(pgClient);
 
         // Create a string select menu for table names
         const tableSelectMenu = new ActionRowBuilder()
